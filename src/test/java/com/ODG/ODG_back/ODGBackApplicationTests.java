@@ -1,10 +1,10 @@
-package com.wheretogo.wheretogo_back;
+package com.ODG.ODG_back;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class WheretogoBackApplicationTests {
+class ODGBackApplicationTests {
 
 	@Test
 	void contextLoads() {

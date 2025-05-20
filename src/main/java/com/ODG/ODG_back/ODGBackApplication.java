@@ -1,13 +1,13 @@
-package com.wheretogo.wheretogo_back;
+package com.ODG.ODG_back;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class WheretogoBackApplication {
+public class ODGBackApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(WheretogoBackApplication.class, args);
+		SpringApplication.run(ODGBackApplication.class, args);
 	}
 
 }
