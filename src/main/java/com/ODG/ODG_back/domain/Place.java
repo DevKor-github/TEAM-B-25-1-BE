@@ -2,11 +2,13 @@ package com.ODG.ODG_back.domain;
 
 import com.ODG.ODG_back.domain.enums.PlaceCategory;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
+@Getter
 public class Place {
 
     @Id
