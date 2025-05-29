@@ -2,11 +2,13 @@ package com.ODG.ODG_back.domain;
 
 import com.ODG.ODG_back.domain.enums.MeetingType;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
+@Getter
 public class Meeting {
 
     @Id
