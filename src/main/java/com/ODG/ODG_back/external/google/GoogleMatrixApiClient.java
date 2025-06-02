@@ -1,8 +1,9 @@
 package com.ODG.ODG_back.external.google;
 
-import java.math.BigDecimal;
+import com.ODG.ODG_back.domain.enums.TransportType;
+
 import java.util.List;
 
 public interface GoogleMatrixApiClient {
-    int[][] getTimeMatrix(List<List<BigDecimal>> origins, List<List<BigDecimal>> destinations);
+    int[][] getTimeMatrix(List<String> origins, List<String> destinations, TransportType transport);
 }
