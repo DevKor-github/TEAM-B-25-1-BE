@@ -34,26 +34,14 @@ public class PlaceService {
 
         List<Place> places = placeRepository.findByMidpoint(midpoint);
 
-        return switch (meeting.getType()) {
-            case SOCIAL -> filterSocialPlaces(places);
-            case PROJECT -> filterProjectPlaces(places);
-        };
-    }
-    private List<PlaceResponseDto> filterSocialPlaces(List<Place> places) {
-        return places.stream()
-                .filter(p -> p.getCategory() == PlaceCategory.RESTAURANT
-                        || p.getCategory() == PlaceCategory.CAFE
-                        || p.getCategory() == PlaceCategory.ENTERTAINMENT
-                )
-                .map(placeMapper::toDto)
-                .toList();
+        return filterPlaces(places, meeting.getType());
     }
 
-    private List<PlaceResponseDto> filterProjectPlaces(List<Place> places) {
+    private List<PlaceResponseDto> filterPlaces(List<Place> places, MeetingType type) {
+        List<PlaceCategory> allowed = type.getCategories();
+
         return places.stream()
-                .filter(p -> p.getCategory() == PlaceCategory.LOUNGE
-                        || p.getCategory() == PlaceCategory.STUDY_CAFE
-                )
+                .filter(p -> allowed.contains(p.getCategory()))
                 .map(placeMapper::toDto)
                 .toList();
     }

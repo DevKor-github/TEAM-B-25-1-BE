@@ -12,7 +12,5 @@ public interface PlaceMapper {
     PlaceMapper INSTANCE = Mappers.getMapper(PlaceMapper.class);
 
     @Mapping(source = "id", target = "placeId")
-    @Mapping(source = "latitude", target = "latitude")
-    @Mapping(source = "longitude", target = "longitude")
     PlaceResponseDto toDto(Place place);
 }
