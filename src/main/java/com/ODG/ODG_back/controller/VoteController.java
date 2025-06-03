@@ -1,7 +1,7 @@
 package com.ODG.ODG_back.controller;
 
-import com.ODG.ODG_back.dto.vote.request.VoteRequestDTO;
-import com.ODG.ODG_back.dto.vote.response.VoteResultDTO;
+import com.ODG.ODG_back.dto.vote.request.VoteRequestDto;
+import com.ODG.ODG_back.dto.vote.response.VoteResultDto;
 import com.ODG.ODG_back.service.VoteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,7 +19,7 @@ public class VoteController {
 
     @PostMapping("/vote")
     public ResponseEntity<String> vote(@PathVariable String inviteCode,
-                                  @RequestBody VoteRequestDTO voteRequest) {
+                                  @RequestBody VoteRequestDto voteRequest) {
         try {
             voteService.vote(inviteCode, voteRequest);
             return ResponseEntity.ok().body("OK");
@@ -33,7 +33,7 @@ public class VoteController {
     @GetMapping("/result")
     public ResponseEntity<?> getVoteResults(@PathVariable String inviteCode) {
         try {
-            List<VoteResultDTO> voteResults = voteService.getVoteResults(inviteCode);
+            List<VoteResultDto> voteResults = voteService.getVoteResults(inviteCode);
             return ResponseEntity.ok(voteResults);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

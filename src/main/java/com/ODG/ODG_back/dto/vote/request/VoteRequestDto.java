@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class VoteRequestDTO {
+public class VoteRequestDto {
     private Long placeId;
     private Long participantId;
 }

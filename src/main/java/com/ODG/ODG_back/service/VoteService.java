@@ -4,8 +4,8 @@ import com.ODG.ODG_back.domain.Meeting;
 import com.ODG.ODG_back.domain.Participant;
 import com.ODG.ODG_back.domain.Place;
 import com.ODG.ODG_back.domain.Vote;
-import com.ODG.ODG_back.dto.vote.request.VoteRequestDTO;
-import com.ODG.ODG_back.dto.vote.response.VoteResultDTO;
+import com.ODG.ODG_back.dto.vote.request.VoteRequestDto;
+import com.ODG.ODG_back.dto.vote.response.VoteResultDto;
 import com.ODG.ODG_back.repository.MeetingRepository;
 import com.ODG.ODG_back.repository.ParticipantRepository;
 import com.ODG.ODG_back.repository.PlaceRepository;
@@ -27,7 +27,7 @@ public class VoteService {
     private final ParticipantRepository participantRepository;
     private final VoteRepository voteRepository;
 
-    public void vote(String inviteCode, VoteRequestDTO voteRequestDTO) {
+    public void vote(String inviteCode, VoteRequestDto voteRequestDTO) {
         Meeting meeting = meetingRepository.findByInviteCode(inviteCode)
                 .orElseThrow(() -> new RuntimeException("Meeting not found"));
         Place place = placeRepository.findById(voteRequestDTO.getPlaceId())
@@ -52,7 +52,7 @@ public class VoteService {
         }
     }
 
-    public List<VoteResultDTO> getVoteResults(String inviteCode) {
+    public List<VoteResultDto> getVoteResults(String inviteCode) {
         Meeting meeting = meetingRepository.findByInviteCode(inviteCode)
                 .orElseThrow(() -> new RuntimeException("Meeting not found"));
 
@@ -65,8 +65,8 @@ public class VoteService {
         return results.stream().map(resultRow -> {
             Place place = (Place) resultRow[0];
             Long totalVotesLong = (Long) resultRow[1];
-            // VoteResultDTO 생성 시 필드명이 voteCount로 변경되었으므로 자동으로 매핑됨
-            return new VoteResultDTO(place.getId(), place.getName(), totalVotesLong.intValue());
+            // VoteResultDto 생성 시 필드명이 voteCount로 변경되었으므로 자동으로 매핑됨
+            return new VoteResultDto(place.getId(), place.getName(), totalVotesLong.intValue());
         }).collect(Collectors.toList());
     }
 }
