@@ -8,5 +8,5 @@ import lombok.Getter;
 public class VoteResultDto {
     private Long placeId;
     private String name;
-    private int voteCount;
+    private Long voteCount;
 }

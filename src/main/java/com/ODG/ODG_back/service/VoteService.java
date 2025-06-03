@@ -13,10 +13,8 @@ import com.ODG.ODG_back.repository.VoteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -56,17 +54,6 @@ public class VoteService {
         Meeting meeting = meetingRepository.findByInviteCode(inviteCode)
                 .orElseThrow(() -> new RuntimeException("Meeting not found"));
 
-        List<Object[]> results = voteRepository.findVoteCountsByMeeting(meeting);
-
-        if (results.isEmpty()) {
-            return new ArrayList<>(); // 투표가 없으면 빈 리스트 반환
-        }
-
-        return results.stream().map(resultRow -> {
-            Place place = (Place) resultRow[0];
-            Long totalVotesLong = (Long) resultRow[1];
-            // VoteResultDto 생성 시 필드명이 voteCount로 변경되었으므로 자동으로 매핑됨
-            return new VoteResultDto(place.getId(), place.getName(), totalVotesLong.intValue());
-        }).collect(Collectors.toList());
+        return voteRepository.findVoteCountsByMeeting(meeting);
     }
 }

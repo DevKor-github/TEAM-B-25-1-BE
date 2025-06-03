@@ -4,6 +4,7 @@ import com.ODG.ODG_back.domain.Meeting;
 import com.ODG.ODG_back.domain.Participant;
 import com.ODG.ODG_back.domain.Place;
 import com.ODG.ODG_back.domain.Vote;
+import com.ODG.ODG_back.dto.vote.response.VoteResultDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,6 +15,7 @@ import java.util.Optional;
 public interface VoteRepository extends JpaRepository<Vote, Long> {
     Optional<Vote> findByMeetingAndPlaceAndParticipant(Meeting meeting, Place place, Participant participant);
 
-    @Query("SELECT v.place, SUM(v.voteValue) FROM Vote v WHERE v.meeting = :meeting GROUP BY v.place")
-    List<Object[]> findVoteCountsByMeeting(@Param("meeting") Meeting meeting);
+    @Query("SELECT new com.ODG.ODG_back.dto.vote.response.VoteResultDto(v.place.id, v.place.name, SUM(v.voteValue)) " +
+            "FROM Vote v WHERE v.meeting = :meeting GROUP BY v.place")
+    List<VoteResultDto> findVoteCountsByMeeting(@Param("meeting") Meeting meeting);
 }
