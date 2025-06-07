@@ -5,13 +5,15 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Setter
 public class Participant {
 
     @Id
@@ -24,9 +26,12 @@ public class Participant {
     private String address;
 
     @Enumerated(EnumType.STRING)
-    private TransportType transport;
+    private TransportType transport_type;
 
     private LocalDateTime joinedAt;
+
+    private BigDecimal latitude;
+    private BigDecimal longitude;
 
     @ManyToOne
     private Meeting meeting;
