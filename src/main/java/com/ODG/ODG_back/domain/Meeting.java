@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -40,6 +39,7 @@ public class Meeting {
 
     @OneToMany(mappedBy = "meeting")
     private List<RecommendedMidpoint> recommendedMidpoints;
+
 
     @PrePersist
     private void generateInviteCode() {

@@ -26,13 +26,14 @@ public class Participant {
     private String address;
 
     @Enumerated(EnumType.STRING)
+
     private TransportType transport_type;
 
     private LocalDateTime joinedAt;
 
     private BigDecimal latitude;
     private BigDecimal longitude;
-
+  
     @ManyToOne
     private Meeting meeting;
 }
