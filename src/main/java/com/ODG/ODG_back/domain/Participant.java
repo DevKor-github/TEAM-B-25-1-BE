@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter
+@Builder
 public class Participant {
 
     @Id
