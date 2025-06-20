@@ -2,6 +2,7 @@ package com.ODG.ODG_back.controller;
 
 import com.ODG.ODG_back.dto.meeting.request.MeetingCreateRequestDto;
 import com.ODG.ODG_back.dto.meeting.response.MeetingCreateResponseDto;
+import com.ODG.ODG_back.dto.meeting.response.MeetingInfoResponseDto;
 import com.ODG.ODG_back.service.MeetingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,5 +17,10 @@ public class MeetingController {
     @PostMapping("/")
     public ResponseEntity<MeetingCreateResponseDto> createMeeting(@RequestBody MeetingCreateRequestDto dto) {
         return ResponseEntity.ok(meetingService.addMeeting(dto));
+    }
+
+    @GetMapping("/{linkCode}")
+    public ResponseEntity<MeetingInfoResponseDto> getMeeting(@PathVariable String linkCode) {
+        return ResponseEntity.ok(meetingService.getMeeting(linkCode));
     }
 }

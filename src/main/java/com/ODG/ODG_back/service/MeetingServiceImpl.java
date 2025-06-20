@@ -4,9 +4,8 @@ import com.ODG.ODG_back.domain.Meeting;
 import com.ODG.ODG_back.domain.Participant;
 import com.ODG.ODG_back.dto.meeting.request.MeetingCreateRequestDto;
 import com.ODG.ODG_back.dto.meeting.response.MeetingCreateResponseDto;
-import com.ODG.ODG_back.dto.participant.MeetingCreateRequestMapper;
-import com.ODG.ODG_back.dto.participant.MeetingCreateResponseMapper;
-import com.ODG.ODG_back.dto.participant.ParticipantListResponseMapper;
+import com.ODG.ODG_back.dto.meeting.response.MeetingInfoResponseDto;
+import com.ODG.ODG_back.dto.participant.*;
 import com.ODG.ODG_back.dto.participant.response.ParticipantListResponseDto;
 import com.ODG.ODG_back.repository.MeetingRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +21,7 @@ public class MeetingServiceImpl implements MeetingService {
     private final MeetingCreateRequestMapper meetingCreateRequestMapper;
     private final MeetingCreateResponseMapper meetingCreateResponseMapper;
     private final ParticipantListResponseMapper participantListResponseMapper;
+    private final MeetingInfoResponseMapper meetingInfoResponseMapper;
 
     @Override
     public MeetingCreateResponseDto addMeeting(MeetingCreateRequestDto dto) {
@@ -59,13 +59,13 @@ public class MeetingServiceImpl implements MeetingService {
     }
 
     @Override
-    public MeetingCreateResponseDto getMeeting(String linkCode) {
+    public MeetingInfoResponseDto getMeeting(String linkCode) {
         try{
             Optional<Meeting> meeting = meetingRepository.findByInviteCode(linkCode);
             if(meeting.isEmpty()){
                 throw new IllegalArgumentException("Meeting with the given link code does not exist.");
             }
-            return meetingCreateResponseMapper.toDto(meeting.get());
+            return meetingInfoResponseMapper.toDto(meeting.get());
         }catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
