@@ -7,6 +7,6 @@ public class ParticipantListResponseDto {
     private Long participantId;
     private String name;
     private String transportType;
-    private Double lat;
-    private Double lng;
+    private Double latitude;
+    private Double longitude;
 }
