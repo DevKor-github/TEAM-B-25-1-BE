@@ -9,11 +9,9 @@ import java.math.BigDecimal;
 @Getter
 @AllArgsConstructor
 public class ParticipantRegisterRequestDto {
-    private Long id;
     private String name;
     private String address;
-
     private TransportType transportType;
-    private BigDecimal latitude;
-    private BigDecimal longitude;
+    private BigDecimal lat;
+    private BigDecimal lng;
 }
