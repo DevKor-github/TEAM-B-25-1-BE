@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -25,7 +26,7 @@ public class Meeting {
     private MeetingType type;
 
     @Column(unique = true)
-    private String inviteCode;;
+    private String inviteCode;
 
     private LocalDateTime createdAt;
 
