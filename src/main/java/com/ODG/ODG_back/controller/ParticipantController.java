@@ -1,10 +1,17 @@
 package com.ODG.ODG_back.controller;
 
-import com.ODG.ODG_back.dto.participant.request.ParticipantDto;
+import com.ODG.ODG_back.dto.participant.request.ParticipantDeletionRequestDto;
+import com.ODG.ODG_back.dto.participant.request.ParticipantRegisterRequestDto;
+import com.ODG.ODG_back.dto.participant.request.ParticipantUpdateRequestDto;
+import com.ODG.ODG_back.dto.participant.response.ParticipantListResponseDto;
+import com.ODG.ODG_back.dto.participant.response.ParticipantRegisterResponseDto;
+import com.ODG.ODG_back.service.MeetingServiceImpl;
+import com.ODG.ODG_back.service.ParticipantService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -12,26 +19,30 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ParticipantController {
 
+    private final ParticipantService participantService;
+    private final MeetingServiceImpl meetingServiceImpl;
+
     @PostMapping("/register")
-    public ResponseEntity<?> addParticipant(@PathVariable String linkCode, @RequestBody ParticipantDto participantDto){
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<ParticipantRegisterResponseDto> addParticipant(@PathVariable String linkCode, @RequestBody ParticipantRegisterRequestDto participantRegisterRequestDto){
+        ParticipantRegisterResponseDto participantRegisterResponseDto = participantService.addParticipant(linkCode, participantRegisterRequestDto);
+        return ResponseEntity.ok(participantRegisterResponseDto);
     }
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/delete")
-    public void deleteParticipant(@PathVariable String linkCode, @RequestParam Long participantId){
-
+    public ResponseEntity<Void> deleteParticipant(@PathVariable String linkCode, @RequestBody ParticipantDeletionRequestDto participantDeletionRequestDto){
+        participantService.deleteParticipant(linkCode, participantDeletionRequestDto);
+        return ResponseEntity.ok().build();
     }
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/update")
-    public void updateParticipant(@PathVariable String linkCode, @RequestBody ParticipantDto participantDto){
-        
+    public ResponseEntity<Void> updateParticipant(@PathVariable String linkCode, @RequestBody ParticipantUpdateRequestDto participantUpdateRequestDto){
+        participantService.modifyParticipant(linkCode, participantUpdateRequestDto);
+        return ResponseEntity.ok().build();
     }
 
-    @ResponseStatus(org.springframework.http.HttpStatus.OK)
     @GetMapping("/")
-    public ResponseEntity<ParticipantDto> getParticipants(@PathVariable String linkCode){
-        return ResponseEntity.ok(null);
+    public ResponseEntity<List<ParticipantListResponseDto>> getParticipants(@PathVariable String linkCode){
+        meetingServiceImpl.getParticipants(linkCode);
+        return ResponseEntity.ok().build();
     }
 }
