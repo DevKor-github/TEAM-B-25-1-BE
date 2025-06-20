@@ -2,12 +2,11 @@ package com.ODG.ODG_back.service;
 
 import com.ODG.ODG_back.domain.Meeting;
 import com.ODG.ODG_back.domain.Participant;
-import com.ODG.ODG_back.dto.meeting.request.MeetingRequestDto;
-import com.ODG.ODG_back.dto.meeting.response.MeetingResponseDto;
-import com.ODG.ODG_back.dto.participant.MeetingRequestMapper;
-import com.ODG.ODG_back.dto.participant.MeetingResponseMapper;
+import com.ODG.ODG_back.dto.meeting.request.MeetingCreateRequestDto;
+import com.ODG.ODG_back.dto.meeting.response.MeetingCreateResponseDto;
+import com.ODG.ODG_back.dto.participant.MeetingCreateRequestMapper;
+import com.ODG.ODG_back.dto.participant.MeetingCreateResponseMapper;
 import com.ODG.ODG_back.dto.participant.ParticipantListResponseMapper;
-import com.ODG.ODG_back.dto.participant.ParticipantUpdateMapper;
 import com.ODG.ODG_back.dto.participant.response.ParticipantListResponseDto;
 import com.ODG.ODG_back.repository.MeetingRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,15 +19,15 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MeetingServiceImpl implements MeetingService {
     private final MeetingRepository meetingRepository;
-    private final MeetingRequestMapper meetingRequestMapper;
-    private final MeetingResponseMapper meetingResponseMapper;
+    private final MeetingCreateRequestMapper meetingCreateRequestMapper;
+    private final MeetingCreateResponseMapper meetingCreateResponseMapper;
     private final ParticipantListResponseMapper participantListResponseMapper;
 
     @Override
-    public MeetingResponseDto addMeeting(MeetingRequestDto dto) {
+    public MeetingCreateResponseDto addMeeting(MeetingCreateRequestDto dto) {
         try{
-            Meeting meeting = meetingRepository.save(meetingRequestMapper.toEntity(dto));
-            return meetingResponseMapper.toDto(meeting);
+            Meeting meeting = meetingRepository.save(meetingCreateRequestMapper.toEntity(dto));
+            return meetingCreateResponseMapper.toDto(meeting);
         } catch (Exception e) {
             // 예외 처리 로직 추가
             throw new RuntimeException("Failed to add meeting", e);
@@ -36,10 +35,10 @@ public class MeetingServiceImpl implements MeetingService {
     }
 
     @Override
-    public MeetingResponseDto modifyMeeting(MeetingRequestDto dto) {
+    public MeetingCreateResponseDto modifyMeeting(MeetingCreateRequestDto dto) {
         try {
-            Meeting updatedMeeting = meetingRepository.save(meetingRequestMapper.toEntity(dto));
-            return meetingResponseMapper.toDto(updatedMeeting);
+            Meeting updatedMeeting = meetingRepository.save(meetingCreateRequestMapper.toEntity(dto));
+            return meetingCreateResponseMapper.toDto(updatedMeeting);
         }catch (Exception e) {
             // 예외 처리 로직 추가
             throw new RuntimeException("Failed to modify meeting", e);
@@ -60,13 +59,13 @@ public class MeetingServiceImpl implements MeetingService {
     }
 
     @Override
-    public MeetingResponseDto getMeeting(String linkCode) {
+    public MeetingCreateResponseDto getMeeting(String linkCode) {
         try{
             Optional<Meeting> meeting = meetingRepository.findByInviteCode(linkCode);
             if(meeting.isEmpty()){
                 throw new IllegalArgumentException("Meeting with the given link code does not exist.");
             }
-            return meetingResponseMapper.toDto(meeting.get());
+            return meetingCreateResponseMapper.toDto(meeting.get());
         }catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
