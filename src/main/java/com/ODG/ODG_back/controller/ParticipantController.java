@@ -42,7 +42,7 @@ public class ParticipantController {
 
     @GetMapping("/")
     public ResponseEntity<List<ParticipantListResponseDto>> getParticipants(@PathVariable String linkCode){
-        meetingServiceImpl.getParticipants(linkCode);
-        return ResponseEntity.ok().build();
+        List<ParticipantListResponseDto> participants = meetingServiceImpl.getParticipants(linkCode);
+        return ResponseEntity.ok(participants);
     }
 }
