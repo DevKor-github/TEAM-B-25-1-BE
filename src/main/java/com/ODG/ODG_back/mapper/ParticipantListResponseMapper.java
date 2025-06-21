@@ -1,4 +1,4 @@
-package com.ODG.ODG_back.dto.participant;
+package com.ODG.ODG_back.mapper;
 
 import com.ODG.ODG_back.domain.Participant;
 import com.ODG.ODG_back.dto.participant.response.ParticipantListResponseDto;
@@ -7,8 +7,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 
 @Mapper(componentModel = "spring")
-public interface ParticipantListResponseMapper extends EntityMapper<ParticipantListResponseDto, Participant> {
-    @Override
+public interface ParticipantListResponseMapper{
     @Mappings({
             @Mapping(source = "id", target = "participantId"),
             @Mapping(source = "latitude", target = "lat"),

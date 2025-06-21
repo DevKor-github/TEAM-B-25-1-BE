@@ -1,4 +1,4 @@
-package com.ODG.ODG_back.dto.participant;
+package com.ODG.ODG_back.mapper;
 
 import com.ODG.ODG_back.domain.Meeting;
 import com.ODG.ODG_back.dto.meeting.request.MeetingCreateRequestDto;
@@ -9,8 +9,7 @@ import org.mapstruct.Mappings;
 import java.time.LocalDateTime;
 
 @Mapper(componentModel = "spring", imports = {LocalDateTime.class})
-public interface MeetingCreateRequestMapper extends EntityMapper<MeetingCreateRequestDto, Meeting>{
-    @Override
+public interface MeetingCreateRequestMapper{
     @Mappings({
             @Mapping(source = "name", target = "title"),
             @Mapping(source = "purpose", target = "type"),
