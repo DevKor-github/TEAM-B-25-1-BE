@@ -3,11 +3,24 @@ package com.ODG.ODG_back.dto.participant;
 import com.ODG.ODG_back.domain.Meeting;
 import com.ODG.ODG_back.dto.meeting.request.MeetingCreateRequestDto;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 
-@Mapper(componentModel = "spring")
+import java.time.LocalDateTime;
+
+@Mapper(componentModel = "spring", imports = {LocalDateTime.class})
 public interface MeetingCreateRequestMapper extends EntityMapper<MeetingCreateRequestDto, Meeting>{
-    /*
-    As MeetingCreateRequestMapper extends EntityMapper, it inherits the methods to convert between MeetingCreateRequestDto and Meeting entities.
-    No additional methods are needed here as the EntityMapper interface already provides the necessary conversion methods.
-     */
+    @Override
+    @Mappings({
+            @Mapping(source = "name", target = "title"),
+            @Mapping(source = "purpose", target = "type"),
+            @Mapping(target = "createdAt", expression = "java(LocalDateTime.now())"),
+            @Mapping(target = "expiresAt", expression = "java(LocalDateTime.now().plusDays(7))"),
+            @Mapping(target = "id", ignore = true),
+            @Mapping(target = "inviteCode", ignore = true),
+            @Mapping(target = "participants", ignore = true),
+            @Mapping(target = "votes", ignore = true),
+            @Mapping(target = "recommendedMidpoints", ignore = true)
+    })
+    Meeting toEntity(MeetingCreateRequestDto dto);
 }
