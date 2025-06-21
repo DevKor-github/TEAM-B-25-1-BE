@@ -49,7 +49,7 @@ public class ParticipantServiceImpl implements ParticipantService{
         try{
             Participant participant = participantUpdateMapper.toEntity(dto);
 
-            if(!participantRepository.existsById(dto.getId())){
+            if(!participantRepository.existsById(participant.getId())){
                 throw new IllegalArgumentException("Participant with the given ID does not exist.");
             }
 
