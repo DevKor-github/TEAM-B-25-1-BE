@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class ParticipantServiceImpl implements ParticipantService{
+public class ParticipantServiceImpl implements ParticipantService {
     private final ParticipantRepository participantRepository;
     private final ParticipantUpdateMapper participantUpdateMapper;
     private final MeetingRepository meetingRepository;
@@ -46,16 +46,18 @@ public class ParticipantServiceImpl implements ParticipantService{
 
     @Override
     public void modifyParticipant(String linkCode, ParticipantUpdateRequestDto dto) {
-        try{
-            Participant participant = participantUpdateMapper.toEntity(dto);
+        try {
+            Participant existingParticipant = participantRepository.findById(dto.getParticipantId())
+                    .orElseThrow(() -> new IllegalArgumentException("Participant with the given ID does not exist."));
 
-            if(!participantRepository.existsById(participant.getId())){
-                throw new IllegalArgumentException("Participant with the given ID does not exist.");
+            Meeting meeting = meetingRepository.findByInviteCode(linkCode)
+                    .orElseThrow(() -> new IllegalArgumentException("Meeting with the given link code does not exist."));
+            participantUpdateMapper.updateFromDto(dto, existingParticipant);
+            if (!existingParticipant.getMeeting().equals(meeting)) {
+                throw new IllegalArgumentException("The participant does not belong to the specified meeting.");
             }
 
-            participantRepository.save(participant);
-
-        }catch (Exception e){
+        } catch (Exception e) {
             // Handle exceptions such as participant not found or other errors
             throw new RuntimeException("An error occurred while modifying the participant: " + e.getMessage());
         }
@@ -63,8 +65,8 @@ public class ParticipantServiceImpl implements ParticipantService{
 
     @Override
     public void deleteParticipant(String linkCode, ParticipantDeletionRequestDto dto) {
-        try{
-            if(!participantRepository.existsById(dto.getParticipantId())){
+        try {
+            if (!participantRepository.existsById(dto.getParticipantId())) {
                 throw new IllegalArgumentException("Participant with the given ID does not exist.");
             }
 
