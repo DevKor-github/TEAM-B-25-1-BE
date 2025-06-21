@@ -12,11 +12,13 @@ import com.ODG.ODG_back.repository.PlaceRepository;
 import com.ODG.ODG_back.repository.VoteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class VoteService {
 
@@ -39,14 +41,8 @@ public class VoteService {
             Vote newVote = new Vote(meeting, place, participant);
             voteRepository.save(newVote);
         }
-        // toggle 형식
         else {
-            if (existingVote.get().getVoteValue() == 1) {
-                existingVote.get().setVoteValue(0);
-            }
-            else {
-                existingVote.get().setVoteValue(1);
-            }
+            existingVote.get().toggleVoteValue();
         }
     }
 
