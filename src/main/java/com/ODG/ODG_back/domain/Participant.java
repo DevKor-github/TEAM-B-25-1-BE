@@ -2,10 +2,7 @@ package com.ODG.ODG_back.domain;
 
 import com.ODG.ODG_back.domain.enums.TransportType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -13,6 +10,7 @@ import java.time.LocalDateTime;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
 @Setter
 @Builder
 public class Participant {
@@ -27,8 +25,7 @@ public class Participant {
     private String address;
 
     @Enumerated(EnumType.STRING)
-
-    private TransportType transport_type;
+    private TransportType transportType;
 
     private LocalDateTime joinedAt;
 
