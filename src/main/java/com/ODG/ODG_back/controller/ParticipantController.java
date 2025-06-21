@@ -5,7 +5,7 @@ import com.ODG.ODG_back.dto.participant.request.ParticipantRegisterRequestDto;
 import com.ODG.ODG_back.dto.participant.request.ParticipantUpdateRequestDto;
 import com.ODG.ODG_back.dto.participant.response.ParticipantListResponseDto;
 import com.ODG.ODG_back.dto.participant.response.ParticipantRegisterResponseDto;
-import com.ODG.ODG_back.service.MeetingServiceImpl;
+import com.ODG.ODG_back.service.MeetingService;
 import com.ODG.ODG_back.service.ParticipantService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +20,7 @@ import java.util.List;
 public class ParticipantController {
 
     private final ParticipantService participantService;
-    private final MeetingServiceImpl meetingServiceImpl;
+    private final MeetingService meetingService;
 
     @PostMapping("/register")
     public ResponseEntity<ParticipantRegisterResponseDto> addParticipant(@PathVariable String linkCode, @RequestBody ParticipantRegisterRequestDto participantRegisterRequestDto){
@@ -42,7 +42,7 @@ public class ParticipantController {
 
     @GetMapping("/")
     public ResponseEntity<List<ParticipantListResponseDto>> getParticipants(@PathVariable String linkCode){
-        List<ParticipantListResponseDto> participants = meetingServiceImpl.getParticipants(linkCode);
+        List<ParticipantListResponseDto> participants = meetingService.getParticipants(linkCode);
         return ResponseEntity.ok(participants);
     }
 }
