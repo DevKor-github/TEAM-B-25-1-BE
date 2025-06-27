@@ -27,9 +27,13 @@ public class PlaceService {
     private final PlaceMapper placeMapper;
 
     public List<PlaceResponseDto> getPlacesByMidpoint(String inviteCode) {
-        Meeting meeting = meetingRepository.findByInviteCode(inviteCode);
+        Meeting meeting = meetingRepository.findByInviteCode(inviteCode).orElseThrow(
+                () -> new IllegalArgumentException("not found.")
+        );
 
-        RecommendedMidpoint recommendedMidpoint = recommendedMidpointRepository.findByMeeting(meeting);
+        RecommendedMidpoint recommendedMidpoint = recommendedMidpointRepository.findByMeeting(meeting).orElseThrow(
+                () -> new IllegalArgumentException("not found.")
+        );
         Midpoint midpoint = recommendedMidpoint.getMidpoint();
 
         List<Place> places = placeRepository.findByMidpoint(midpoint);

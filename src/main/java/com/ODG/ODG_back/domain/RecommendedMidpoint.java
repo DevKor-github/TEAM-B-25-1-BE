@@ -14,7 +14,7 @@ public class RecommendedMidpoint {
     private Long id;
 
     private double score;
-
+    @Column(name = "midpoint_rank")
     private int rank;
 
     private LocalDateTime recommendedAt;

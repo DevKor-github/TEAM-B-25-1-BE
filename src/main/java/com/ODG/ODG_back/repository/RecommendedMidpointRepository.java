@@ -4,6 +4,8 @@ import com.ODG.ODG_back.domain.Meeting;
 import com.ODG.ODG_back.domain.RecommendedMidpoint;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface RecommendedMidpointRepository extends JpaRepository<RecommendedMidpoint, Long> {
-    RecommendedMidpoint findByMeeting(Meeting meeting);
+    Optional<RecommendedMidpoint> findByMeeting(Meeting meeting);
 }
