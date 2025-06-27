@@ -31,7 +31,7 @@ public class Participant {
 
     private BigDecimal latitude;
     private BigDecimal longitude;
-  
+
     @ManyToOne
     private Meeting meeting;
 }

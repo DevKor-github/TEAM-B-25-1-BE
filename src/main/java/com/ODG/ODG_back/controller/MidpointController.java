@@ -1,5 +1,6 @@
 package com.ODG.ODG_back.controller;
 
+import com.ODG.ODG_back.dto.midpoint.response.MidpointResponseDto;
 import com.ODG.ODG_back.service.MidpointService;
 import com.ODG.ODG_back.strategy.MidpointStrategyType;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +15,8 @@ public class MidpointController {
     private final MidpointService midpointService;
 
     @GetMapping
-    public ResponseEntity<?>getRecommendedMidpoints(@PathVariable String inviteCode,
-                                                    @RequestParam MidpointStrategyType strategyType) {
+    public ResponseEntity<MidpointResponseDto> getRecommendedMidpoints(@PathVariable String inviteCode,
+                                                                            @RequestParam MidpointStrategyType strategyType) {
         return ResponseEntity.ok(midpointService.getRecommendedMidpoints(inviteCode, strategyType));
     }
 

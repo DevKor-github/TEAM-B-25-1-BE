@@ -16,7 +16,7 @@ public class MidpointService {
     // 전략 빈 자동 주입
     private final Map<String, MidpointStrategy> strategyMap;
 
-    public List<MidpointResponseDto> getRecommendedMidpoints(String inviteCode, MidpointStrategyType strategyType) {
+    public MidpointResponseDto getRecommendedMidpoints(String inviteCode, MidpointStrategyType strategyType) {
         MidpointStrategy strategy = strategyMap.get(strategyType.getBeanName());
 
         return strategy.calculateMidpoints(inviteCode);
