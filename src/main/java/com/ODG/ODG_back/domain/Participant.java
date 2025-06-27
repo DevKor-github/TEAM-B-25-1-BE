@@ -2,19 +2,17 @@ package com.ODG.ODG_back.domain;
 
 import com.ODG.ODG_back.domain.enums.TransportType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
+@Builder
 public class Participant {
 
     @Id
@@ -26,14 +24,13 @@ public class Participant {
     @Column(columnDefinition = "TEXT")
     private String address;
 
-    private BigDecimal latitude;
-
-    private BigDecimal longitude;
-
     @Enumerated(EnumType.STRING)
-    private TransportType transport;
+    private TransportType transportType;
 
     private LocalDateTime joinedAt;
+
+    private BigDecimal latitude;
+    private BigDecimal longitude;
 
     @ManyToOne
     private Meeting meeting;
