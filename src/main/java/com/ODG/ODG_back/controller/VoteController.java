@@ -19,7 +19,7 @@ public class VoteController {
 
     @PostMapping("/vote")
     public ResponseEntity<String> vote(@PathVariable String inviteCode,
-                                  @RequestBody VoteRequestDto voteRequest) {
+                                       @RequestBody VoteRequestDto voteRequest) {
         try {
             voteService.vote(inviteCode, voteRequest);
             return ResponseEntity.ok().body("OK");
@@ -38,4 +38,6 @@ public class VoteController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
+    }
+
 }
