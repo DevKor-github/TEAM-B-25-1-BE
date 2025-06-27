@@ -32,7 +32,9 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
     @Override
     public MidpointResponseDto calculateMidpoints(String inviteCode) {
 
-        Meeting meeting = meetingRepository.findByInviteCode(inviteCode);
+        Meeting meeting = meetingRepository.findByInviteCode(inviteCode).orElseThrow(
+                () -> new IllegalArgumentException("Meeting not found.")
+        );
         List<Participant> participants = meeting.getParticipants();
         List<Midpoint> allMidpoints = midpointRepository.findAll();
 
@@ -51,7 +53,7 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
         int[][] timeMatrix = new int[participants.size()][destinations.size()];
 
         var grouped = participants.stream()
-                .collect(groupingBy(Participant::getTransport));
+                .collect(groupingBy(Participant::getTransportType));
         int rowIndex = 0;
 
         for (var entry: grouped.entrySet()) {

@@ -16,7 +16,7 @@ public class GoogleMatrixApiClientImpl implements GoogleMatrixApiClient {
     private final String googleApiKey;
     private final WebClient webClient;
 
-    public GoogleMatrixApiClientImpl(WebClient.Builder builder, @Value("${google.api.key}") String googleApiKey) {
+    public GoogleMatrixApiClientImpl(WebClient.Builder builder, @Value("${google.api-key}") String googleApiKey) {
         this.webClient = builder.build();
         this.googleApiKey = googleApiKey;
     }

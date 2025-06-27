@@ -9,5 +9,5 @@ import java.util.List;
 public interface PlaceRepository extends JpaRepository<Place, Long> {
 
 
-    List<Place> findByMidpoint(Midpoint midpoint);
+    List<Place> findByMidpoints(Midpoint midpoint);
 }

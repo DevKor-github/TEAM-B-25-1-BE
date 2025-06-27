@@ -7,4 +7,7 @@ import java.util.Optional;
 
 public interface MeetingRepository extends JpaRepository<Meeting, Long> {
     Optional<Meeting> findByInviteCode(String inviteCode);
+
+    void deleteByInviteCode(String inviteCode);
+
 }

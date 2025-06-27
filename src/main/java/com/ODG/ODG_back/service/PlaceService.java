@@ -36,7 +36,7 @@ public class PlaceService {
         );
         Midpoint midpoint = recommendedMidpoint.getMidpoint();
 
-        List<Place> places = placeRepository.findByMidpoint(midpoint);
+        List<Place> places = placeRepository.findByMidpoints(midpoint);
 
         return filterPlaces(places, meeting.getType());
     }

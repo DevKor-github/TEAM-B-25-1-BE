@@ -15,3 +15,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+
+  google:
+    api-key: ${GOOGLE_API_KEY}
