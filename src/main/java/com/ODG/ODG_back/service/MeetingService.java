@@ -6,6 +6,7 @@ import com.ODG.ODG_back.dto.meeting.request.MeetingCreateRequestDto;
 import com.ODG.ODG_back.dto.meeting.response.MeetingCreateResponseDto;
 import com.ODG.ODG_back.dto.meeting.response.MeetingInfoResponseDto;
 import com.ODG.ODG_back.dto.participant.response.ParticipantListResponseDto;
+import com.ODG.ODG_back.exception.custom.NotFoundException;
 import com.ODG.ODG_back.mapper.MeetingCreateRequestMapper;
 import com.ODG.ODG_back.mapper.MeetingCreateResponseMapper;
 import com.ODG.ODG_back.mapper.MeetingInfoResponseMapper;
@@ -27,64 +28,32 @@ public class MeetingService {
     private final MeetingInfoResponseMapper meetingInfoResponseMapper;
 
     public MeetingCreateResponseDto addMeeting(MeetingCreateRequestDto dto) {
-        try{
-            Meeting meeting = meetingRepository.save(meetingCreateRequestMapper.toEntity(dto));
-            return meetingCreateResponseMapper.toDto(meeting);
-        } catch (Exception e) {
-            // 예외 처리 로직 추가
-            throw new RuntimeException("Failed to add meeting", e);
-        }
+        Meeting meeting = meetingRepository.save(meetingCreateRequestMapper.toEntity(dto));
+        return meetingCreateResponseMapper.toDto(meeting);
     }
 
     public MeetingCreateResponseDto modifyMeeting(MeetingCreateRequestDto dto) {
-        try {
-            Meeting updatedMeeting = meetingRepository.save(meetingCreateRequestMapper.toEntity(dto));
-            return meetingCreateResponseMapper.toDto(updatedMeeting);
-        }catch (Exception e) {
-            // 예외 처리 로직 추가
-            throw new RuntimeException("Failed to modify meeting", e);
-        }
+        Meeting updatedMeeting = meetingRepository.save(meetingCreateRequestMapper.toEntity(dto));
+        return meetingCreateResponseMapper.toDto(updatedMeeting);
     }
 
     public void deleteMeeting(String linkCode) {
-        try {
-            if (meetingRepository.findByInviteCode(linkCode).isEmpty()) {
-                throw new IllegalArgumentException("Meeting with the given link code does not exist.");
-            }
-            meetingRepository.deleteByInviteCode(linkCode);
-        } catch (Exception e) {
-            // 예외 처리 로직 추가
-            throw new RuntimeException("Failed to delete meeting", e);
-        }
+        Meeting meeting = meetingRepository.findByInviteCode(linkCode)
+                .orElseThrow(() -> new NotFoundException("해당 코드의 Meeting이 존재하지 않습니다."));
+        meetingRepository.delete(meeting);
     }
 
     public MeetingInfoResponseDto getMeeting(String linkCode) {
-        try{
-            Optional<Meeting> meeting = meetingRepository.findByInviteCode(linkCode);
-            if(meeting.isEmpty()){
-                throw new IllegalArgumentException("Meeting with the given link code does not exist.");
-            }
-            return meetingInfoResponseMapper.toDto(meeting.get());
-        }catch (IllegalArgumentException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to retrieve meeting", e);
-        }
+        Meeting meeting = meetingRepository.findByInviteCode(linkCode)
+                .orElseThrow(() -> new NotFoundException("해당 코드의 Meeting이 존재하지 않습니다."));
+        return meetingInfoResponseMapper.toDto(meeting);
     }
 
     public List<ParticipantListResponseDto> getParticipants(String linkCode) {
-        List<Participant> participants;
-        try {
-            Optional<Meeting> meeting = meetingRepository.findByInviteCode(linkCode);
-            if (meeting.isEmpty()) {
-                throw new IllegalArgumentException("Meeting with the given link code does not exist.");
-            }
-            participants = meeting.get().getParticipants();
-        } catch (IllegalArgumentException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to retrieve participants", e);
-        }
-        return participants.stream().map(participantListResponseMapper::toDto).toList();
+        Meeting meeting = meetingRepository.findByInviteCode(linkCode)
+                .orElseThrow(() -> new NotFoundException("해당 코드의 Meeting이 존재하지 않습니다."));
+        return meeting.getParticipants().stream()
+                .map(participantListResponseMapper::toDto)
+                .toList();
     }
 }

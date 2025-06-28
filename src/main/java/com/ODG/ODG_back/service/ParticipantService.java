@@ -2,6 +2,8 @@ package com.ODG.ODG_back.service;
 
 import com.ODG.ODG_back.domain.Meeting;
 import com.ODG.ODG_back.domain.Participant;
+import com.ODG.ODG_back.exception.custom.BadRequestException;
+import com.ODG.ODG_back.exception.custom.NotFoundException;
 import com.ODG.ODG_back.mapper.ParticipantRegisterRequestMapper;
 import com.ODG.ODG_back.mapper.ParticipantRegisterResponseMapper;
 import com.ODG.ODG_back.mapper.ParticipantUpdateMapper;
@@ -25,55 +27,42 @@ public class ParticipantService {
     private final ParticipantRegisterResponseMapper participantRegisterResponseMapper;
 
     public ParticipantRegisterResponseDto addParticipant(String linkCode, ParticipantRegisterRequestDto dto) {
-        Participant participant;
+        Participant participant = participantRegisterRequestMapper.toEntity(dto);
+        Meeting meeting = meetingRepository.findByInviteCode(linkCode)
+                .orElseThrow(() -> new NotFoundException("해당 코드의 Meeting이 존재하지 않습니다."));
+        participant.setMeeting(meeting);
         try {
-            participant = participantRegisterRequestMapper.toEntity(dto);
-            Meeting meeting = meetingRepository.findByInviteCode(linkCode).orElseThrow(
-                    () -> new IllegalArgumentException("Meeting with the given link code does not exist.")
-            );
-            participant.setMeeting(meeting);
             participantRepository.save(participant);
         } catch (DataIntegrityViolationException e) {
-            // Handle the case where the participant already exists
-            throw new IllegalArgumentException("Participant already exists with the given details.");
-        } catch (Exception e) {
-            // Handle other exceptions
-            throw new RuntimeException("An error occurred while adding the participant: " + e.getMessage());
+            throw new BadRequestException("이미 동일한 정보의 참가자가 존재합니다.");
         }
         return participantRegisterResponseMapper.toDto(participant);
     }
 
     public void modifyParticipant(String linkCode, ParticipantUpdateRequestDto dto) {
-        try {
-            Participant existingParticipant = participantRepository.findById(dto.getParticipantId())
-                    .orElseThrow(() -> new IllegalArgumentException("Participant with the given ID does not exist."));
+        Participant existingParticipant = participantRepository.findById(dto.getParticipantId())
+                .orElseThrow(() -> new NotFoundException("해당 ID의 참가자가 존재하지 않습니다."));
+        Meeting meeting = meetingRepository.findByInviteCode(linkCode)
+                .orElseThrow(() -> new NotFoundException("해당 코드의 Meeting이 존재하지 않습니다."));
 
-            Meeting meeting = meetingRepository.findByInviteCode(linkCode)
-                    .orElseThrow(() -> new IllegalArgumentException("Meeting with the given link code does not exist."));
-            if (!existingParticipant.getMeeting().equals(meeting)) {
-                throw new IllegalArgumentException("The participant does not belong to the specified meeting.");
-            }
-            participantUpdateMapper.updateFromDto(dto, existingParticipant);
-            participantRepository.save(existingParticipant);
-        } catch (Exception e) {
-            // Handle exceptions such as participant not found or other errors
-            throw new RuntimeException("An error occurred while modifying the participant: " + e.getMessage());
+        if (!existingParticipant.getMeeting().equals(meeting)) {
+            throw new BadRequestException("해당 참가자는 지정된 모임에 속하지 않습니다.");
         }
+
+        participantUpdateMapper.updateFromDto(dto, existingParticipant);
+        participantRepository.save(existingParticipant);
     }
 
     public void deleteParticipant(String linkCode, ParticipantDeletionRequestDto dto) {
-        try {
-            if (!participantRepository.existsById(dto.getParticipantId())) {
-                throw new IllegalArgumentException("Participant with the given ID does not exist.");
-            }
+        Participant existingParticipant = participantRepository.findById(dto.getParticipantId())
+                .orElseThrow(() -> new NotFoundException("해당 ID의 참가자가 존재하지 않습니다."));
+        Meeting meeting = meetingRepository.findByInviteCode(linkCode)
+                .orElseThrow(() -> new NotFoundException("해당 코드의 Meeting이 존재하지 않습니다."));
 
-            participantRepository.deleteById(dto.getParticipantId());
-        } catch (DataIntegrityViolationException e) {
-            // Handle the case where the participant cannot be deleted due to foreign key constraints
-            throw new IllegalArgumentException("Cannot delete participant due to existing references.");
-        } catch (Exception e) {
-            // Handle other exceptions
-            throw new RuntimeException("An error occurred while deleting the participant: " + e.getMessage());
+        if (!existingParticipant.getMeeting().equals(meeting)) {
+            throw new BadRequestException("해당 참가자는 지정된 모임에 속하지 않습니다.");
         }
+
+        participantRepository.deleteById(dto.getParticipantId());
     }
 }

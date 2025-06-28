@@ -5,6 +5,8 @@ import com.ODG.ODG_back.domain.Midpoint;
 import com.ODG.ODG_back.domain.Participant;
 import com.ODG.ODG_back.domain.RecommendedMidpoint;
 import com.ODG.ODG_back.dto.midpoint.response.MidpointResponseDto;
+import com.ODG.ODG_back.exception.custom.BadRequestException;
+import com.ODG.ODG_back.exception.custom.NotFoundException;
 import com.ODG.ODG_back.external.google.GoogleMatrixApiClient;
 import com.ODG.ODG_back.mapper.MidpointMapper;
 import com.ODG.ODG_back.repository.MeetingRepository;
@@ -33,9 +35,11 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
     public MidpointResponseDto calculateMidpoints(String inviteCode) {
 
         Meeting meeting = meetingRepository.findByInviteCode(inviteCode).orElseThrow(
-                () -> new IllegalArgumentException("Meeting not found.")
+                () -> new NotFoundException("해당 초대 코드의 Meeting이 존재하지 않습니다.")
         );
+        // 출발지 = 참가자 위치
         List<Participant> participants = meeting.getParticipants();
+        // 목적지 = 모든 지하철역
         List<Midpoint> allMidpoints = midpointRepository.findAll();
 
         int[][] timeMatrix = buildTimeMatrix(participants, allMidpoints);
@@ -93,7 +97,7 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
                 .sorted(Comparator.comparingDouble(MidpointScore::avg)
                         .thenComparingDouble(MidpointScore::totalDeviation))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("No MIDPOINT found"));
+                .orElseThrow(() -> new BadRequestException("적절한 중간지점을 찾을 수 없습니다."));
     }
 
     private void saveRecommendedMidpoint(MidpointScore best, Meeting meeting) {

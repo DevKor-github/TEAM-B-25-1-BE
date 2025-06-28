@@ -6,6 +6,7 @@ import com.ODG.ODG_back.domain.Place;
 import com.ODG.ODG_back.domain.Vote;
 import com.ODG.ODG_back.dto.vote.request.VoteRequestDto;
 import com.ODG.ODG_back.dto.vote.response.VoteResultDto;
+import com.ODG.ODG_back.exception.custom.NotFoundException;
 import com.ODG.ODG_back.repository.MeetingRepository;
 import com.ODG.ODG_back.repository.ParticipantRepository;
 import com.ODG.ODG_back.repository.PlaceRepository;
@@ -29,26 +30,25 @@ public class VoteService {
 
     public void vote(String inviteCode, VoteRequestDto voteRequestDTO) {
         Meeting meeting = meetingRepository.findByInviteCode(inviteCode)
-                .orElseThrow(() -> new RuntimeException("Meeting not found"));
+                .orElseThrow(() -> new NotFoundException("해당 초대 코드의 Meeting이 존재하지 않습니다."));
         Place place = placeRepository.findById(voteRequestDTO.getPlaceId())
-                .orElseThrow(() -> new RuntimeException("Place not found"));
+                .orElseThrow(() -> new NotFoundException("해당 ID의 Place가 존재하지 않습니다."));
         Participant participant = participantRepository.findById(voteRequestDTO.getParticipantId())
-                .orElseThrow(() -> new RuntimeException("Participant not found"));
+                .orElseThrow(() -> new NotFoundException("해당 ID의 참가자가 존재하지 않습니다."));
 
         Optional<Vote> existingVote = voteRepository.findByMeetingAndPlaceAndParticipant(meeting, place, participant);
 
         if (existingVote.isEmpty()) {
             Vote newVote = new Vote(meeting, place, participant);
             voteRepository.save(newVote);
-        }
-        else {
+        } else {
             existingVote.get().toggleVoteValue();
         }
     }
 
     public List<VoteResultDto> getVoteResults(String inviteCode) {
         Meeting meeting = meetingRepository.findByInviteCode(inviteCode)
-                .orElseThrow(() -> new RuntimeException("Meeting not found"));
+                .orElseThrow(() -> new NotFoundException("해당 초대 코드의 Meeting이 존재하지 않습니다."));
 
         return voteRepository.findVoteCountsByMeeting(meeting);
     }
