@@ -6,6 +6,7 @@ import com.ODG.ODG_back.domain.Place;
 import com.ODG.ODG_back.domain.Vote;
 import com.ODG.ODG_back.dto.vote.request.VoteRequestDto;
 import com.ODG.ODG_back.dto.vote.response.VoteResultDto;
+import com.ODG.ODG_back.exception.ErrorCode;
 import com.ODG.ODG_back.exception.custom.NotFoundException;
 import com.ODG.ODG_back.repository.MeetingRepository;
 import com.ODG.ODG_back.repository.ParticipantRepository;
@@ -30,11 +31,11 @@ public class VoteService {
 
     public void vote(String inviteCode, VoteRequestDto voteRequestDTO) {
         Meeting meeting = meetingRepository.findByInviteCode(inviteCode)
-                .orElseThrow(() -> new NotFoundException("해당 초대 코드의 Meeting이 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.MEETING_NOT_FOUND));
         Place place = placeRepository.findById(voteRequestDTO.getPlaceId())
-                .orElseThrow(() -> new NotFoundException("해당 ID의 Place가 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PLACE_NOT_FOUND));
         Participant participant = participantRepository.findById(voteRequestDTO.getParticipantId())
-                .orElseThrow(() -> new NotFoundException("해당 ID의 참가자가 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PARTICIPANT_NOT_FOUND));
 
         Optional<Vote> existingVote = voteRepository.findByMeetingAndPlaceAndParticipant(meeting, place, participant);
 
@@ -48,7 +49,7 @@ public class VoteService {
 
     public List<VoteResultDto> getVoteResults(String inviteCode) {
         Meeting meeting = meetingRepository.findByInviteCode(inviteCode)
-                .orElseThrow(() -> new NotFoundException("해당 초대 코드의 Meeting이 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.MEETING_NOT_FOUND));
 
         return voteRepository.findVoteCountsByMeeting(meeting);
     }

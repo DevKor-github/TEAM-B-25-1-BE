@@ -6,6 +6,7 @@ import com.ODG.ODG_back.dto.meeting.request.MeetingCreateRequestDto;
 import com.ODG.ODG_back.dto.meeting.response.MeetingCreateResponseDto;
 import com.ODG.ODG_back.dto.meeting.response.MeetingInfoResponseDto;
 import com.ODG.ODG_back.dto.participant.response.ParticipantListResponseDto;
+import com.ODG.ODG_back.exception.ErrorCode;
 import com.ODG.ODG_back.exception.custom.NotFoundException;
 import com.ODG.ODG_back.mapper.MeetingCreateRequestMapper;
 import com.ODG.ODG_back.mapper.MeetingCreateResponseMapper;
@@ -39,19 +40,19 @@ public class MeetingService {
 
     public void deleteMeeting(String linkCode) {
         Meeting meeting = meetingRepository.findByInviteCode(linkCode)
-                .orElseThrow(() -> new NotFoundException("해당 코드의 Meeting이 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.MEETING_NOT_FOUND));
         meetingRepository.delete(meeting);
     }
 
     public MeetingInfoResponseDto getMeeting(String linkCode) {
         Meeting meeting = meetingRepository.findByInviteCode(linkCode)
-                .orElseThrow(() -> new NotFoundException("해당 코드의 Meeting이 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.MEETING_NOT_FOUND));
         return meetingInfoResponseMapper.toDto(meeting);
     }
 
     public List<ParticipantListResponseDto> getParticipants(String linkCode) {
         Meeting meeting = meetingRepository.findByInviteCode(linkCode)
-                .orElseThrow(() -> new NotFoundException("해당 코드의 Meeting이 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.MEETING_NOT_FOUND));
         return meeting.getParticipants().stream()
                 .map(participantListResponseMapper::toDto)
                 .toList();
