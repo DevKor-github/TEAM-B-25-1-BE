@@ -5,7 +5,6 @@ import com.ODG.ODG_back.exception.custom.BadRequestException;
 import com.ODG.ODG_back.exception.custom.ExternalApiException;
 import com.ODG.ODG_back.exception.custom.NotFoundException;
 import com.ODG.ODG_back.exception.custom.UnauthorizedException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,28 +13,23 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+
     // 404 Not Found
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ErrorResponse> handlerNotFoundException(NotFoundException e) {
-        ErrorCode errorCode = e.getErrorCode();
-        ErrorResponse response = new ErrorResponse(errorCode.getCode(), errorCode.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        return buildResponse(e.getErrorCode(), HttpStatus.NOT_FOUND);
     }
 
     // 400 Bad Request
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorResponse> handlerBadRequestException(BadRequestException e) {
-        ErrorCode errorCode = e.getErrorCode();
-        ErrorResponse response = new ErrorResponse(errorCode.getCode(), errorCode.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return buildResponse(e.getErrorCode(), HttpStatus.BAD_REQUEST);
     }
 
     // 401 Unauthorized
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ErrorResponse> handlerUnauthorizedException(UnauthorizedException e) {
-        ErrorCode errorCode = e.getErrorCode();
-        ErrorResponse response = new ErrorResponse(errorCode.getCode(), errorCode.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        return buildResponse(e.getErrorCode(), HttpStatus.UNAUTHORIZED);
     }
 
     // 500 Internal Server Error
@@ -46,10 +40,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    // 503 External Error
+    // 502, 503 External Error
     @ExceptionHandler(ExternalApiException.class)
     public ResponseEntity<ErrorResponse> handlerExternalApiException(ExternalApiException e) {
-        ErrorResponse response = new ErrorResponse("503", "외부 API 오류: " + e.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.SERVICE_UNAVAILABLE);
+        return buildResponse(e.getErrorCode(), HttpStatus.valueOf(Integer.parseInt(e.getErrorCode().getCode())));
+    }
+
+    private ResponseEntity<ErrorResponse> buildResponse(ErrorCode errorCode, HttpStatus status) {
+        return new ResponseEntity<>(new ErrorResponse(errorCode.getCode(), errorCode.getMessage()), status);
     }
 }

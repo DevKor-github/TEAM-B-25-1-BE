@@ -17,7 +17,8 @@ public enum ErrorCode {
     UNAUTHORIZED("401", "인증되지 않았습니다."),
     INTERNAL_SERVER_ERROR("500", "서버 내부 오류가 발생했습니다."),
 
-    EXTERNAL_API_ERROR("503", "외부 API 호출에 실패했습니다.");
+    EXTERNAL_API_CONNECTION_FAILED("503", "외부 API에 연결 실패했습니다."),
+    EXTERNAL_API_RESPONSE_ERROR("502", "외부 API 응답 상태 오류");
 
     private final String code;
     private final String message;

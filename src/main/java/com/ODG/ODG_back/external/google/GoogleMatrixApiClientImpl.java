@@ -1,9 +1,12 @@
 package com.ODG.ODG_back.external.google;
 
 import com.ODG.ODG_back.domain.enums.TransportType;
+import com.ODG.ODG_back.exception.ErrorCode;
+import com.ODG.ODG_back.exception.custom.ExternalApiException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientException;
 
 import java.util.List;
 import java.util.Map;
@@ -27,6 +30,11 @@ public class GoogleMatrixApiClientImpl implements GoogleMatrixApiClient {
         String url = buildUrl(origins, destinations, transport);
         Map<String, Object> response = fetchApiResponse(url);
 
+        String status = (String) response.get("status");
+        if (!"OK".equals(status)) {
+            throw new ExternalApiException(ErrorCode.EXTERNAL_API_RESPONSE_ERROR, status);
+        }
+
         return parseTimeMatrix(response, origins.size(), destinations.size());
     }
 
@@ -46,10 +54,14 @@ public class GoogleMatrixApiClientImpl implements GoogleMatrixApiClient {
     }
 
     private Map<String, Object> fetchApiResponse(String url) {
-        return webClient.get()
-                .uri(url)
-                .retrieve()
-                .bodyToMono(Map.class)
-                .block();
+        try {
+            return webClient.get()
+                    .uri(url)
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
+        } catch (WebClientException e) {
+            throw new ExternalApiException(ErrorCode.EXTERNAL_API_CONNECTION_FAILED, e.getMessage());
+        }
     }
 }

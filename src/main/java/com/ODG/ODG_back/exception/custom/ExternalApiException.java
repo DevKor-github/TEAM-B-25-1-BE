@@ -1,11 +1,24 @@
 package com.ODG.ODG_back.exception.custom;
 
+import com.ODG.ODG_back.exception.ErrorCode;
+
 public class ExternalApiException extends RuntimeException {
-    public ExternalApiException(String message) {
-        super(message);
+
+    private final ErrorCode errorCode;
+    private final String detail;
+
+
+    public ExternalApiException(ErrorCode errorCode, String detail) {
+        super(errorCode.getMessage() + "[" + detail + "]");
+        this.errorCode = errorCode;
+        this.detail = detail;
     }
 
-    public ExternalApiException(String message, Throwable cause) {
-        super(message, cause);
+    public ErrorCode getErrorCode() {
+        return errorCode;
+    }
+
+    public String getDetail() {
+        return detail;
     }
 }

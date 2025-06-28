@@ -6,7 +6,6 @@ import com.ODG.ODG_back.domain.Participant;
 import com.ODG.ODG_back.domain.RecommendedMidpoint;
 import com.ODG.ODG_back.dto.midpoint.response.MidpointResponseDto;
 import com.ODG.ODG_back.exception.ErrorCode;
-import com.ODG.ODG_back.exception.custom.BadRequestException;
 import com.ODG.ODG_back.exception.custom.NotFoundException;
 import com.ODG.ODG_back.external.google.GoogleMatrixApiClient;
 import com.ODG.ODG_back.mapper.MidpointMapper;
