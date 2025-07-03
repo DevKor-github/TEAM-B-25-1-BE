@@ -20,24 +20,14 @@ public class VoteController {
     @PostMapping("/vote")
     public ResponseEntity<String> vote(@PathVariable String inviteCode,
                                        @RequestBody VoteRequestDto voteRequest) {
-        try {
-            voteService.vote(inviteCode, voteRequest);
-            return ResponseEntity.ok().body("OK");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
-
-
+        voteService.vote(inviteCode, voteRequest);
+        return ResponseEntity.ok().body("OK");
     }
 
     @GetMapping("/result")
     public ResponseEntity<?> getVoteResults(@PathVariable String inviteCode) {
-        try {
-            List<VoteResultDto> voteResults = voteService.getVoteResults(inviteCode);
-            return ResponseEntity.ok(voteResults);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        List<VoteResultDto> voteResults = voteService.getVoteResults(inviteCode);
+        return ResponseEntity.ok(voteResults);
     }
 
 }

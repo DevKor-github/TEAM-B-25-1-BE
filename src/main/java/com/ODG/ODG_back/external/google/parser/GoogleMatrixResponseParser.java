@@ -6,7 +6,6 @@ import java.util.Map;
 public class GoogleMatrixResponseParser {
     public static int[][] parseTimeMatrix(Map<String, Object> response, int originSize, int destinationSize) {
         List<Map<String, Object>> rows = (List<Map<String, Object>>) response.get("rows");
-
         int[][] timeMatrix = new int[originSize][destinationSize];
 
         for (int i = 0; i < originSize; i++) {

@@ -5,6 +5,8 @@ import com.ODG.ODG_back.domain.Midpoint;
 import com.ODG.ODG_back.domain.Participant;
 import com.ODG.ODG_back.domain.RecommendedMidpoint;
 import com.ODG.ODG_back.dto.midpoint.response.MidpointResponseDto;
+import com.ODG.ODG_back.exception.ErrorCode;
+import com.ODG.ODG_back.exception.custom.NotFoundException;
 import com.ODG.ODG_back.external.google.GoogleMatrixApiClient;
 import com.ODG.ODG_back.mapper.MidpointMapper;
 import com.ODG.ODG_back.repository.MeetingRepository;
@@ -32,8 +34,12 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
     @Override
     public MidpointResponseDto calculateMidpoints(String inviteCode) {
 
-        Meeting meeting = meetingRepository.findByInviteCode(inviteCode);
+        Meeting meeting = meetingRepository.findByInviteCode(inviteCode).orElseThrow(
+                () -> new NotFoundException(ErrorCode.MEETING_NOT_FOUND)
+        );
+        // 출발지 = 참가자 위치
         List<Participant> participants = meeting.getParticipants();
+        // 목적지 = 모든 지하철역
         List<Midpoint> allMidpoints = midpointRepository.findAll();
 
         int[][] timeMatrix = buildTimeMatrix(participants, allMidpoints);
@@ -51,7 +57,7 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
         int[][] timeMatrix = new int[participants.size()][destinations.size()];
 
         var grouped = participants.stream()
-                .collect(groupingBy(Participant::getTransport));
+                .collect(groupingBy(Participant::getTransportType));
         int rowIndex = 0;
 
         for (var entry: grouped.entrySet()) {
@@ -91,7 +97,7 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
                 .sorted(Comparator.comparingDouble(MidpointScore::avg)
                         .thenComparingDouble(MidpointScore::totalDeviation))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("No MIDPOINT found"));
+                .orElseThrow(() -> new RuntimeException());
     }
 
     private void saveRecommendedMidpoint(MidpointScore best, Meeting meeting) {
