@@ -32,6 +32,8 @@ public class Participant {
     private BigDecimal latitude;
     private BigDecimal longitude;
 
+    private String userId; // jwt에서 추출한 익명 사용자 ID (UUID)
+
     @ManyToOne
     private Meeting meeting;
 }
