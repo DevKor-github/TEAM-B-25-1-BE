@@ -25,9 +25,9 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/participants/**").authenticated()
-                        .requestMatchers("/auth/**", "meetings/**").permitAll()
-                        .anyRequest().permitAll()
+                        .requestMatchers("/meetings/**").permitAll()
+                        .requestMatchers("/meetings/**/participants/register").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
