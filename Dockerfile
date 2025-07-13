@@ -4,6 +4,7 @@ WORKDIR /workspace/app
 
 # Gradle 래퍼와 소스코드 복사
 COPY gradlew .
+COPY gradle ./gradle
 COPY build.gradle .
 COPY settings.gradle .
 COPY src ./src
@@ -17,7 +18,7 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 # 빌드 스테이지에서 생성된 JAR 파일만 복사
-COPY --from=builder /workspace/app/build/libs/*.jar app.jar
+COPY --from=builder /workspace/app/build/libs/app.jar app.jar
 
 # 8080 포트 노출
 EXPOSE 8080
