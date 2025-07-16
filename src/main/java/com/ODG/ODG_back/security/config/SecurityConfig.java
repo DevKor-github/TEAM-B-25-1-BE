@@ -25,8 +25,12 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/meetings/**").permitAll()
-                        .requestMatchers("/meetings/**/participants/register").permitAll()
+                        .requestMatchers("/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**",
+                                "/swagger-ui.html").permitAll()
+                        .requestMatchers("/meetings/", "/meetings/{linkCode}/info").permitAll()
+                        .requestMatchers("/meetings/{linkCode}/participants/register").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)

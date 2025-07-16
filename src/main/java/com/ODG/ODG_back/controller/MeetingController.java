@@ -19,7 +19,7 @@ public class MeetingController {
         return ResponseEntity.ok(meetingService.addMeeting(dto));
     }
 
-    @GetMapping("/{linkCode}")
+    @GetMapping("/{linkCode}/info")
     public ResponseEntity<MeetingInfoResponseDto> getMeeting(@PathVariable String linkCode) {
         return ResponseEntity.ok(meetingService.getMeeting(linkCode));
     }
