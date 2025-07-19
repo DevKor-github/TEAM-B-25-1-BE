@@ -8,7 +8,6 @@ import com.ODG.ODG_back.exception.custom.NotFoundException;
 import com.ODG.ODG_back.mapper.ParticipantRegisterRequestMapper;
 import com.ODG.ODG_back.mapper.ParticipantRegisterResponseMapper;
 import com.ODG.ODG_back.mapper.ParticipantUpdateMapper;
-import com.ODG.ODG_back.dto.participant.request.ParticipantDeletionRequestDto;
 import com.ODG.ODG_back.dto.participant.request.ParticipantRegisterRequestDto;
 import com.ODG.ODG_back.dto.participant.request.ParticipantUpdateRequestDto;
 import com.ODG.ODG_back.dto.participant.response.ParticipantRegisterResponseDto;
@@ -43,31 +42,23 @@ public class ParticipantService {
     }
 
     // 참가자 정보 수정
-    public void modifyParticipant(String linkCode, ParticipantUpdateRequestDto dto) {
-        Participant existingParticipant = participantRepository.findById(dto.getParticipantId())
-                .orElseThrow(() -> new NotFoundException(ErrorCode.PARTICIPANT_NOT_FOUND));
+    public void modifyParticipant(String linkCode, Long participantId, ParticipantUpdateRequestDto dto) {
         Meeting meeting = meetingRepository.findByInviteCode(linkCode)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.MEETING_NOT_FOUND));
+        Participant participant = participantRepository.findByIdAndMeeting(participantId, meeting)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PARTICIPANT_NOT_FOUND));
 
-        if (!existingParticipant.getMeeting().equals(meeting)) {
-            throw new BadRequestException(ErrorCode.BAD_REQUEST);
-        }
-
-        participantUpdateMapper.updateFromDto(dto, existingParticipant);
-        participantRepository.save(existingParticipant);
+        participantUpdateMapper.updateFromDto(dto, participant);
+        participantRepository.save(participant);
     }
 
     // 참가자 삭제
-    public void deleteParticipant(String linkCode, ParticipantDeletionRequestDto dto) {
-        Participant existingParticipant = participantRepository.findById(dto.getParticipantId())
-                .orElseThrow(() -> new NotFoundException(ErrorCode.PARTICIPANT_NOT_FOUND));
+    public void deleteParticipant(String linkCode, Long participantId) {
         Meeting meeting = meetingRepository.findByInviteCode(linkCode)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.MEETING_NOT_FOUND));
+        Participant participant = participantRepository.findByIdAndMeeting(participantId, meeting)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PARTICIPANT_NOT_FOUND));
 
-        if (!existingParticipant.getMeeting().equals(meeting)) {
-            throw new BadRequestException(ErrorCode.BAD_REQUEST);
-        }
-
-        participantRepository.deleteById(dto.getParticipantId());
+        participantRepository.delete(participant);
     }
 }

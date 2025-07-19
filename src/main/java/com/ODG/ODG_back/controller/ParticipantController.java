@@ -1,6 +1,5 @@
 package com.ODG.ODG_back.controller;
 
-import com.ODG.ODG_back.dto.participant.request.ParticipantDeletionRequestDto;
 import com.ODG.ODG_back.dto.participant.request.ParticipantRegisterRequestDto;
 import com.ODG.ODG_back.dto.participant.request.ParticipantUpdateRequestDto;
 import com.ODG.ODG_back.dto.participant.response.ParticipantListResponseDto;
@@ -40,14 +39,23 @@ public class ParticipantController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<Void> deleteParticipant(@PathVariable String linkCode, @RequestBody ParticipantDeletionRequestDto participantDeletionRequestDto){
-        participantService.deleteParticipant(linkCode, participantDeletionRequestDto);
+    public ResponseEntity<Void> deleteParticipant(
+            @PathVariable String linkCode,
+            @CookieValue("jwt") String jwtToken
+    ) {
+        Long participantId = Long.valueOf(jwtTokenProvider.getUserId(jwtToken));
+        participantService.deleteParticipant(linkCode, participantId);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/update")
-    public ResponseEntity<Void> updateParticipant(@PathVariable String linkCode, @RequestBody ParticipantUpdateRequestDto participantUpdateRequestDto){
-        participantService.modifyParticipant(linkCode, participantUpdateRequestDto);
+    public ResponseEntity<Void> updateParticipant(
+            @PathVariable String linkCode,
+            @RequestBody ParticipantUpdateRequestDto participantUpdateRequestDto,
+            @CookieValue("jwt") String jwtToken // 쿠키에서 jwt 추출
+    ){
+        Long participantId = Long.valueOf(jwtTokenProvider.getUserId(jwtToken));
+        participantService.modifyParticipant(linkCode, participantId, participantUpdateRequestDto);
         return ResponseEntity.ok().build();
     }
 
