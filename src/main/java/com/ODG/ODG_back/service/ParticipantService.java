@@ -42,10 +42,10 @@ public class ParticipantService {
     }
 
     // 참가자 정보 수정
-    public void modifyParticipant(String linkCode, Long participantId, ParticipantUpdateRequestDto dto) {
+    public void modifyParticipant(String linkCode, String userId, ParticipantUpdateRequestDto dto) {
         Meeting meeting = meetingRepository.findByInviteCode(linkCode)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.MEETING_NOT_FOUND));
-        Participant participant = participantRepository.findByIdAndMeeting(participantId, meeting)
+        Participant participant = participantRepository.findByUserIdAndMeeting(userId, meeting)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PARTICIPANT_NOT_FOUND));
 
         participantUpdateMapper.updateFromDto(dto, participant);
@@ -53,10 +53,10 @@ public class ParticipantService {
     }
 
     // 참가자 삭제
-    public void deleteParticipant(String linkCode, Long participantId) {
+    public void deleteParticipant(String linkCode, String userId) {
         Meeting meeting = meetingRepository.findByInviteCode(linkCode)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.MEETING_NOT_FOUND));
-        Participant participant = participantRepository.findByIdAndMeeting(participantId, meeting)
+        Participant participant = participantRepository.findByUserIdAndMeeting(userId, meeting)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PARTICIPANT_NOT_FOUND));
 
         participantRepository.delete(participant);

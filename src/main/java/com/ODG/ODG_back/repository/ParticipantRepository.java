@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface ParticipantRepository extends JpaRepository<Participant, Long> {
-    Optional<Participant> findByIdAndMeeting(Long id, Meeting meeting);
+    Optional<Participant> findByUserIdAndMeeting(String userId, Meeting meeting);
 }

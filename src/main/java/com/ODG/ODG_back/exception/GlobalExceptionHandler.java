@@ -5,11 +5,13 @@ import com.ODG.ODG_back.exception.custom.BadRequestException;
 import com.ODG.ODG_back.exception.custom.ExternalApiException;
 import com.ODG.ODG_back.exception.custom.NotFoundException;
 import com.ODG.ODG_back.exception.custom.UnauthorizedException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -35,6 +37,7 @@ public class GlobalExceptionHandler {
     // 500 Internal Server Error
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handlerRuntimeException(RuntimeException e) {
+        log.error("Internal Server Error", e);
         ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
         ErrorResponse response = new ErrorResponse(errorCode.getCode(), errorCode.getMessage());
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);

@@ -41,10 +41,10 @@ public class ParticipantController {
     @DeleteMapping("/delete")
     public ResponseEntity<Void> deleteParticipant(
             @PathVariable String linkCode,
-            @CookieValue("jwt") String jwtToken
+            @CookieValue("access_token") String jwtToken
     ) {
-        Long participantId = Long.valueOf(jwtTokenProvider.getUserId(jwtToken));
-        participantService.deleteParticipant(linkCode, participantId);
+        String userId = jwtTokenProvider.getUserId(jwtToken);
+        participantService.deleteParticipant(linkCode, userId);
         return ResponseEntity.ok().build();
     }
 
@@ -52,10 +52,10 @@ public class ParticipantController {
     public ResponseEntity<Void> updateParticipant(
             @PathVariable String linkCode,
             @RequestBody ParticipantUpdateRequestDto participantUpdateRequestDto,
-            @CookieValue("jwt") String jwtToken // 쿠키에서 jwt 추출
+            @CookieValue("access_token") String jwtToken // 쿠키에서 jwt 추출
     ){
-        Long participantId = Long.valueOf(jwtTokenProvider.getUserId(jwtToken));
-        participantService.modifyParticipant(linkCode, participantId, participantUpdateRequestDto);
+        String userId = jwtTokenProvider.getUserId(jwtToken);
+        participantService.modifyParticipant(linkCode, userId, participantUpdateRequestDto);
         return ResponseEntity.ok().build();
     }
 
