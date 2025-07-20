@@ -1,5 +1,5 @@
 # Java 17 환경을 기반으로 하는 빌드 스테이지
-FROM openjdk:17-jdk-slim as builder
+FROM openjdk:17-jdk-slim AS builder
 WORKDIR /workspace/app
 
 # Gradle 래퍼와 소스코드 복사
@@ -24,4 +24,4 @@ COPY --from=builder /workspace/app/build/libs/app.jar app.jar
 EXPOSE 8080
 
 # 컨테이너 시작 시 애플리케이션 실행
-ENTRYPOINT ["java","-jar","/app.jar"]
+ENTRYPOINT ["java","-jar","/app/app.jar"]
