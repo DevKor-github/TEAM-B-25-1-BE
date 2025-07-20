@@ -48,6 +48,12 @@ jobs:
           username: ${{ secrets.AWS_EC2_USERNAME }}
           key: ${{ secrets.AWS_EC2_SSH_KEY }}
           script: |
+            export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+            export DB_URL="${{ secrets.DB_URL }}"
+            export DB_USERNAME=${{ secrets.DB_USERNAME }}
+            export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            export GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}
+            
             # 작업 디렉터리로 이동
             cd /home/ubuntu/app
             
