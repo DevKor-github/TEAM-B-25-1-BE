@@ -5,7 +5,7 @@ services:
   # Spring Boot Application
   app:
     # GitHub Actions가 빌드해서 Docker Hub에 올린 이미지를 사용
-    image: [DOCKERHUB_USERNAME]/team-b-25-1-be:latest
+    image: ${DOCKERHUB_USERNAME}/team-b-25-1-be:latest
     container_name: odg-backend
     restart: always
     # .env 파일에 저장된 환경 변수들을 컨테이너 내부로 주입
