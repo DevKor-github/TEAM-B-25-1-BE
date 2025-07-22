@@ -29,12 +29,12 @@ public class VoteService {
     private final ParticipantRepository participantRepository;
     private final VoteRepository voteRepository;
 
-    public void vote(String inviteCode, VoteRequestDto voteRequestDTO) {
+    public void vote(String inviteCode, String userId, VoteRequestDto voteRequestDto) {
         Meeting meeting = meetingRepository.findByInviteCode(inviteCode)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.MEETING_NOT_FOUND));
-        Place place = placeRepository.findById(voteRequestDTO.getPlaceId())
+        Place place = placeRepository.findById(voteRequestDto.getPlaceId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PLACE_NOT_FOUND));
-        Participant participant = participantRepository.findById(voteRequestDTO.getParticipantId())
+        Participant participant = participantRepository.findByUserId(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PARTICIPANT_NOT_FOUND));
 
         Optional<Vote> existingVote = voteRepository.findByMeetingAndPlaceAndParticipant(meeting, place, participant);

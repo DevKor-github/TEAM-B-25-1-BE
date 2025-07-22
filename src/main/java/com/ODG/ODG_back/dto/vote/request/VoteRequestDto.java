@@ -7,5 +7,4 @@ import lombok.Getter;
 @AllArgsConstructor
 public class VoteRequestDto {
     private Long placeId;
-    private Long participantId;
 }
