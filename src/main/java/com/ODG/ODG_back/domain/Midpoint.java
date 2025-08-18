@@ -17,19 +17,15 @@ import java.util.List;
 public class Midpoint {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
 
-    private String line;
-
+    @Column(precision = 15, scale = 8)
     private BigDecimal latitude;
 
+    @Column(precision = 15, scale = 8)
     private BigDecimal longitude;
-
-    @OneToMany(mappedBy = "midpoint")
-    private List<RecommendedMidpoint> recommendedMidpoints;
 
     @ManyToMany(mappedBy = "midpoints")
     private List<Place> places;
