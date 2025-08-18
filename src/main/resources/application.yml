@@ -17,8 +17,11 @@ spring:
         format_sql: true
     database-platform: org.hibernate.dialect.MySQL8Dialect
 
-  google:
-    api-key: ${GOOGLE_API_KEY}
+google:
+  api-key: ${GOOGLE_API_KEY}
 
-  jwt:
-    secret: ${JWT_SECRET}
+jwt:
+  secret: ${JWT_SECRET}
+
+kakao:
+  api-key: ${KAKAO_API_KEY:}

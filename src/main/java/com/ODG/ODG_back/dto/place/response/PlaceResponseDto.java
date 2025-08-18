@@ -9,9 +9,10 @@ import java.math.BigDecimal;
 @Getter
 @AllArgsConstructor
 public class PlaceResponseDto {
-    private Long placeId;
+    private String placeId;
     private String name;
     private PlaceCategory category;
     private BigDecimal latitude;
     private BigDecimal longitude;
+    private String address;
 }

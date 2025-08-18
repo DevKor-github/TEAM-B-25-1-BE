@@ -8,7 +8,7 @@ import static com.ODG.ODG_back.domain.enums.PlaceCategory.*;
 @Getter
 public enum MeetingType {
     SOCIAL(List.of(RESTAURANT, CAFE, ENTERTAINMENT)),
-    PROJECT(List.of(STUDY_CAFE, LOUNGE));
+    PROJECT(List.of(STUDY_CAFE));
 
     private final List<PlaceCategory> categories;
 
