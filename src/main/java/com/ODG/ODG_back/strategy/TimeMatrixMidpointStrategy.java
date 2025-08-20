@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.ToDoubleFunction;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ import static java.util.stream.Collectors.groupingBy;
 
 @Component("timeMatrixStrategy")
 @RequiredArgsConstructor
+@Slf4j
 public class TimeMatrixMidpointStrategy implements MidpointStrategy {
 
     private final MeetingRepository meetingRepository;
@@ -41,6 +43,7 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
 
     @Override
     public MidpointResponseDto calculateMidpoints(String inviteCode) {
+        log.info("Calculating midpoints for inviteCode: {}", inviteCode);
 
         Meeting meeting = meetingRepository.findByInviteCode(inviteCode).orElseThrow(
                 () -> new NotFoundException(ErrorCode.MEETING_NOT_FOUND)
@@ -49,14 +52,19 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
         List<Participant> participants = meeting.getParticipants();
         // 목적지 = 모든 지하철역
         List<Midpoint> allMidpoints = midpointRepository.findAll();
+        log.info("Number of participants: {}, number of midpoints: {}", participants.size(), allMidpoints.size());
+
 
         List<Midpoint> candidates = hubNearCenter(participants, allMidpoints);
 
         TimeMatrix tm = buildTimeMatrix(participants, candidates);
         int[][] timeMatrix = tm.matrix();
         List<Participant> rowOrder = tm.rowOrder();
+        log.info("Time matrix dimensions: {} participants × {} midpoints", timeMatrix.length, timeMatrix[0].length);
+
 
         MidpointScore best = scoreMidpoints(timeMatrix, candidates, participants.size(), rowOrder);
+        log.info("Best midpoint: {}, average time: {}", best.midpoint().getName(), best.avg());
 
         Long currentPid = authService.getCurrentParticipantId(meeting);
         int rowIndex = findRowIndex(rowOrder, currentPid);
@@ -106,10 +114,10 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
 
     private record TimeMatrix(int[][] matrix, List<Participant> rowOrder) {}
 
-    private TimeMatrix buildTimeMatrix(List<Participant> participants, List<Midpoint> allMidpoints) {
+    private TimeMatrix buildTimeMatrix(List<Participant> participants, List<Midpoint> candidates) {
 
-        List <String> destinations = allMidpoints.stream()
-                .map(m -> m.getLatitude() + ", " + m.getLongitude())
+        List <String> destinations = candidates.stream()
+                .map(m -> m.getLatitude() + "," + m.getLongitude())
                 .toList();
         int[][] timeMatrix = new int[participants.size()][destinations.size()];
 
@@ -126,7 +134,7 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
                 .toList();
 
             List<String> origins = group.stream()
-                    .map(p -> p.getLatitude() + ", " + p.getLongitude())
+                    .map(p -> p.getLatitude() + "," + p.getLongitude())
                     .toList();
 
             int[][] groupMatrix = matrixApiClient.getTimeMatrix(origins, destinations, entry.getKey());
@@ -186,6 +194,7 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
     }
 
     private void saveRecommendedMidpoint(MidpointScore best, Meeting meeting) {
+        log.info("Saving recommended midpoint: {}, average time: {}", best.midpoint().getName(), best.avg() / 60);
         RecommendedMidpoint recommended = new RecommendedMidpoint(
                 null,
                 best.avg(),
