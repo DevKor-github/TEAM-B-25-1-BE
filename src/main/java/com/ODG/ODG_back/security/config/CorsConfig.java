@@ -16,6 +16,7 @@ public class CorsConfig {
 
         // 프론트 연동 후 localhost 부분 삭제 필수
         configuration.setAllowedOriginPatterns(Arrays.asList(
+                "*",
                 "http://localhost:*",
                 "https://localhost:*",
                 "https://o-digo.com"
