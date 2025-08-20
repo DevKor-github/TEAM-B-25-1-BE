@@ -19,19 +19,20 @@ public class SwaggerConfig {
                 .description("ODG 프로젝트의 API 명세서입니다.");
 
         String jwtSchemeName = "jwtAuth";
-        // API 요청 헤더에 인증 정보 추가
         SecurityRequirement securityRequirement = new SecurityRequirement().addList(jwtSchemeName);
-        // SecuritySchemes 등록
         Components components = new Components()
                 .addSecuritySchemes(jwtSchemeName, new SecurityScheme()
                         .name(jwtSchemeName)
-                        .type(SecurityScheme.Type.HTTP) // HTTP 방식
+                        .type(SecurityScheme.Type.HTTP)
                         .scheme("bearer")
-                        .bearerFormat("JWT")); // 토큰 형식 지정
+                        .bearerFormat("JWT"));
 
         return new OpenAPI()
                 .info(info)
                 .addSecurityItem(securityRequirement)
-                .components(components);
+                .components(components)
+                .addServersItem(new io.swagger.v3.oas.models.servers.Server()
+                        .url("https://o-digo.com")
+                        .description("Production server"));
     }
 }
