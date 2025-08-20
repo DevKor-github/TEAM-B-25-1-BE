@@ -54,7 +54,7 @@ public class PlaceService {
         log.info("[PlaceService] Found meeting id={}, type={}", meeting.getId(), meeting.getType());
 
 
-        RecommendedMidpoint recommendedMidpoint = recommendedMidpointRepository.findByMeeting(meeting)
+        RecommendedMidpoint recommendedMidpoint = recommendedMidpointRepository.findTopByMeetingOrderByRecommendedAtDesc(meeting)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.RECOMMENDED_MIDPOINT_NOT_FOUND));
         Midpoint midpoint = recommendedMidpoint.getMidpoint();
 
