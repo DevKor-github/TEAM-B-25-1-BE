@@ -13,6 +13,9 @@ import com.ODG.ODG_back.dto.participant.request.ParticipantUpdateRequestDto;
 import com.ODG.ODG_back.dto.participant.response.ParticipantRegisterResponseDto;
 import com.ODG.ODG_back.repository.MeetingRepository;
 import com.ODG.ODG_back.repository.ParticipantRepository;
+import com.ODG.ODG_back.security.jwt.JwtCookieUtil;
+import com.ODG.ODG_back.security.jwt.JwtTokenProvider;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,7 @@ public class ParticipantService {
     private final MeetingRepository meetingRepository;
     private final ParticipantRegisterRequestMapper participantRegisterRequestMapper;
     private final ParticipantRegisterResponseMapper participantRegisterResponseMapper;
+    private final JwtTokenProvider jwtTokenProvider;
 
     // 새 참가자 참여
     public ParticipantRegisterResponseDto addParticipant(String linkCode, ParticipantRegisterRequestDto dto, String userId) {
@@ -38,7 +42,15 @@ public class ParticipantService {
         } catch (DataIntegrityViolationException e) {
             throw new BadRequestException(ErrorCode.DATA_INTEGRITY_VIOLATION);
         }
-        return participantRegisterResponseMapper.toDto(participant);
+
+        ParticipantRegisterResponseDto responseDto = participantRegisterResponseMapper.toDto(participant);
+
+        String token = jwtTokenProvider.createToken(userId);
+
+        responseDto.setAccessToken(token);
+        responseDto.setExpiresIn(jwtTokenProvider.getValidityInMilliseconds() / 1000);
+
+        return responseDto;
     }
 
     // 참가자 정보 수정
