@@ -43,7 +43,7 @@ public class VoteService {
             Vote newVote = new Vote(meeting, place, participant);
             voteRepository.save(newVote);
         } else {
-            existingVote.get().toggleVoteValue();
+            voteRepository.delete(existingVote.get());
         }
     }
 
