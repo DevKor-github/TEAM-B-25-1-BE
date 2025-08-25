@@ -34,7 +34,7 @@ public class VoteService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.MEETING_NOT_FOUND));
         Place place = placeRepository.findById(voteRequestDto.getPlaceId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PLACE_NOT_FOUND));
-        Participant participant = participantRepository.findByUserId(userId)
+        Participant participant = participantRepository.findByUserIdAndMeeting(userId, meeting)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PARTICIPANT_NOT_FOUND));
 
         Optional<Vote> existingVote = voteRepository.findByMeetingAndPlaceAndParticipant(meeting, place, participant);
@@ -47,10 +47,11 @@ public class VoteService {
         }
     }
 
-    public List<VoteResultDto> getVoteResults(String inviteCode) {
+    public List<VoteResultDto> getVoteResults(String inviteCode, String userId) {
         Meeting meeting = meetingRepository.findByInviteCode(inviteCode)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.MEETING_NOT_FOUND));
-
+        participantRepository.findByUserIdAndMeeting(userId, meeting)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PARTICIPANT_NOT_FOUND));
         return voteRepository.findVoteCountsByMeeting(meeting);
     }
 }
