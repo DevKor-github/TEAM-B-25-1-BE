@@ -6,7 +6,6 @@ import com.ODG.ODG_back.dto.participant.response.ParticipantListResponseDto;
 import com.ODG.ODG_back.dto.participant.response.ParticipantRegisterResponseDto;
 import com.ODG.ODG_back.security.jwt.JwtCookieUtil;
 import com.ODG.ODG_back.security.jwt.JwtTokenProvider;
-import com.ODG.ODG_back.service.MeetingService;
 import com.ODG.ODG_back.service.ParticipantService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,6 @@ import java.util.UUID;
 public class ParticipantController {
 
     private final ParticipantService participantService;
-    private final MeetingService meetingService;
     private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/register")
@@ -70,7 +68,7 @@ public class ParticipantController {
 
     @GetMapping("/")
     public ResponseEntity<List<ParticipantListResponseDto>> getParticipants(@PathVariable String linkCode){
-        List<ParticipantListResponseDto> participants = meetingService.getParticipants(linkCode);
+        List<ParticipantListResponseDto> participants = participantService.getParticipantsWithVoteStatus(linkCode);
         return ResponseEntity.ok(participants);
     }
 }

@@ -2,6 +2,7 @@ package com.ODG.ODG_back.service;
 
 import com.ODG.ODG_back.domain.Meeting;
 import com.ODG.ODG_back.domain.Participant;
+import com.ODG.ODG_back.dto.participant.response.ParticipantListResponseDto;
 import com.ODG.ODG_back.exception.ErrorCode;
 import com.ODG.ODG_back.exception.custom.BadRequestException;
 import com.ODG.ODG_back.exception.custom.NotFoundException;
@@ -19,6 +20,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -72,5 +75,8 @@ public class ParticipantService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PARTICIPANT_NOT_FOUND));
 
         participantRepository.delete(participant);
+    }
+    public List<ParticipantListResponseDto> getParticipantsWithVoteStatus(String linkCode) {
+        return participantRepository.findParticipantsWithVoteStatus(linkCode);
     }
 }

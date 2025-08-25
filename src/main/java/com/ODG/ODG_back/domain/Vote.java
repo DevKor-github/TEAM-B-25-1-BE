@@ -39,8 +39,5 @@ public class Vote {
         this.voteValue = 1; // 새 투표 시 voteValue를 1로 고정
         this.votedAt = LocalDateTime.now(); // 투표 생성 시간 설정
     }
-    public void toggleVoteValue() {
-        this.voteValue = (this.voteValue == 1) ? 0 : 1;
-    }
 }
 
