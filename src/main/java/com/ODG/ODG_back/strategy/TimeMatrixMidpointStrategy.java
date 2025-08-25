@@ -76,7 +76,8 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
             best.avg(),
             best.totalDeviation(),
             currentPid,
-            selfTime
+            selfTime,
+            participants.size()
         );
     }
 
@@ -194,7 +195,7 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
     }
 
     private void saveRecommendedMidpoint(MidpointScore best, Meeting meeting) {
-        log.info("Saving recommended midpoint: {}, average time: {}", best.midpoint().getName(), best.avg() / 60);
+        log.info("Saving recommended midpoint: {}, average time: {}", best.midpoint().getName(), best.avg());
         RecommendedMidpoint recommended = new RecommendedMidpoint(
                 null,
                 best.avg(),

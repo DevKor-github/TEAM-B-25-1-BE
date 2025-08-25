@@ -12,10 +12,13 @@ public class MidpointResponseDto {
     private String name;
     private BigDecimal latitude;
     private BigDecimal longitude;
+    private String line;
 
     private double avgTime;
     private double totalDeviation;
 
     private Long participantId;
     private Integer selfTimeSeconds;
+
+    private Integer participantCount;
 }

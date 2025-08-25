@@ -27,7 +27,7 @@ public class Midpoint {
     @Column(precision = 15, scale = 8)
     private BigDecimal longitude;
 
-    private int line;
+    private String line;
 
     private Double hubScore;
 
