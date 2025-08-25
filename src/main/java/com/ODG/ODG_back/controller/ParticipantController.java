@@ -6,10 +6,10 @@ import com.ODG.ODG_back.dto.participant.response.ParticipantListResponseDto;
 import com.ODG.ODG_back.dto.participant.response.ParticipantRegisterResponseDto;
 import com.ODG.ODG_back.security.jwt.JwtCookieUtil;
 import com.ODG.ODG_back.security.jwt.JwtTokenProvider;
-import com.ODG.ODG_back.service.MeetingService;
 import com.ODG.ODG_back.service.ParticipantService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,10 +19,10 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/meetings/{linkCode}/participants")
 @RequiredArgsConstructor
+@Slf4j
 public class ParticipantController {
 
     private final ParticipantService participantService;
-    private final MeetingService meetingService;
     private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/register")
@@ -33,8 +33,15 @@ public class ParticipantController {
     ){
         String userId = UUID.randomUUID().toString();
         ParticipantRegisterResponseDto responseDto = participantService.addParticipant(linkCode, requestDto, userId);
-        String token = jwtTokenProvider.createToken(userId);
-        JwtCookieUtil.addTokenToCookie(response, token);
+        JwtCookieUtil.addTokenToCookie(response, responseDto.getAccessToken());
+
+        log.info("resp pid={}, nick={}, tokenNull={}, ttl={}",
+            responseDto.getParticipantId(),
+            responseDto.getParticipantName(),
+            responseDto.getAccessToken() == null,
+            responseDto.getExpiresIn()
+        );
+
         return ResponseEntity.ok(responseDto);
     }
 
@@ -61,7 +68,7 @@ public class ParticipantController {
 
     @GetMapping("/")
     public ResponseEntity<List<ParticipantListResponseDto>> getParticipants(@PathVariable String linkCode){
-        List<ParticipantListResponseDto> participants = meetingService.getParticipants(linkCode);
+        List<ParticipantListResponseDto> participants = participantService.getParticipantsWithVoteStatus(linkCode);
         return ResponseEntity.ok(participants);
     }
 }

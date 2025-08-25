@@ -46,6 +46,7 @@ jobs:
             export DB_USERNAME=${{ secrets.DB_USERNAME }}
             export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             export GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}
+            export JWT_SECRET=${{ secrets.JWT_SECRET }}
             
             cd /home/ubuntu/app/deploy
             
@@ -55,6 +56,7 @@ jobs:
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}
             DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
             EOF
             
             echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin

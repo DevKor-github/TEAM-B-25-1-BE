@@ -19,16 +19,16 @@ public class VoteController {
     private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/vote")
-    public ResponseEntity<String> vote(@PathVariable String inviteCode,
+    public ResponseEntity<Void> vote(@PathVariable String inviteCode,
                                        @RequestBody VoteRequestDto voteRequestDto,
                                        @CookieValue("access_token") String jwtToken) {
         String userId = jwtTokenProvider.getUserId(jwtToken);
         voteService.vote(inviteCode, userId, voteRequestDto);
-        return ResponseEntity.ok().body("OK");
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/result")
-    public ResponseEntity<?> getVoteResults(@PathVariable String inviteCode) {
+    public ResponseEntity<List<VoteResultDto>> getVoteResults(@PathVariable String inviteCode) {
         List<VoteResultDto> voteResults = voteService.getVoteResults(inviteCode);
         return ResponseEntity.ok(voteResults);
     }
