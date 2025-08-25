@@ -76,7 +76,12 @@ public class ParticipantService {
 
         participantRepository.delete(participant);
     }
-    public List<ParticipantListResponseDto> getParticipantsWithVoteStatus(String linkCode) {
+    public List<ParticipantListResponseDto> getParticipantsWithVoteStatus(String linkCode, String userId) {
+        Meeting meeting = meetingRepository.findByInviteCode(linkCode)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.MEETING_NOT_FOUND));
+        participantRepository.findByUserIdAndMeeting(userId, meeting)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PARTICIPANT_NOT_FOUND));
+
         return participantRepository.findParticipantsWithVoteStatus(linkCode);
     }
 }
