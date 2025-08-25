@@ -5,6 +5,7 @@ import com.ODG.ODG_back.exception.custom.UnauthorizedException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,7 @@ import java.util.Date;
 public class JwtTokenProvider {
 
     private final SecretKey secretKey;
+    @Getter
     private final long validityInMilliseconds = 1000L * 60 * 60 * 24 * 7; // 7일
 
     // JWT 토큰 생성
