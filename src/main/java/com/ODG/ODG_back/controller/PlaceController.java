@@ -22,12 +22,13 @@ public class PlaceController {
 
     @GetMapping("/places")
     public ResponseEntity<GroupedPlacesResponse> getPlacesByMidpoint(
-        @PathVariable String inviteCode,
-        @RequestParam(defaultValue = "600") int radius,
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "15") int size
+            @PathVariable String inviteCode,
+            @RequestParam(defaultValue = "600") int radius,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "15") int size
     ) {
-        return ResponseEntity.ok(placeService.getPlacesByMidpointGrouped(inviteCode, radius, page, size));
+        return ResponseEntity.ok(
+                placeService.getPlacesByMidpointGrouped(inviteCode, radius, page, size));
     }
 
 }

@@ -30,16 +30,17 @@ public class ParticipantController {
             @PathVariable String linkCode,
             @RequestBody ParticipantRegisterRequestDto requestDto,
             HttpServletResponse response
-    ){
+    ) {
         String userId = UUID.randomUUID().toString();
-        ParticipantRegisterResponseDto responseDto = participantService.addParticipant(linkCode, requestDto, userId);
+        ParticipantRegisterResponseDto responseDto = participantService.addParticipant(linkCode,
+                requestDto, userId);
         JwtCookieUtil.addTokenToCookie(response, responseDto.getAccessToken());
 
         log.info("resp pid={}, nick={}, tokenNull={}, ttl={}",
-            responseDto.getParticipantId(),
-            responseDto.getParticipantName(),
-            responseDto.getAccessToken() == null,
-            responseDto.getExpiresIn()
+                responseDto.getParticipantId(),
+                responseDto.getParticipantName(),
+                responseDto.getAccessToken() == null,
+                responseDto.getExpiresIn()
         );
 
         return ResponseEntity.ok(responseDto);
@@ -60,15 +61,17 @@ public class ParticipantController {
             @PathVariable String linkCode,
             @RequestBody ParticipantUpdateRequestDto participantUpdateRequestDto,
             @CookieValue("access_token") String jwtToken // 쿠키에서 jwt 추출
-    ){
+    ) {
         String userId = jwtTokenProvider.getUserId(jwtToken);
         participantService.modifyParticipant(linkCode, userId, participantUpdateRequestDto);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/")
-    public ResponseEntity<List<ParticipantListResponseDto>> getParticipants(@PathVariable String linkCode){
-        List<ParticipantListResponseDto> participants = participantService.getParticipantsWithVoteStatus(linkCode);
+    public ResponseEntity<List<ParticipantListResponseDto>> getParticipants(
+            @PathVariable String linkCode) {
+        List<ParticipantListResponseDto> participants = participantService.getParticipantsWithVoteStatus(
+                linkCode);
         return ResponseEntity.ok(participants);
     }
 }

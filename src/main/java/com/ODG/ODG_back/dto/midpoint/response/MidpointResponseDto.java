@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 @Getter
 @AllArgsConstructor
 public class MidpointResponseDto {
+
     private Long midpointId;
     private String name;
     private BigDecimal latitude;

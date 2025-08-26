@@ -15,26 +15,26 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthService {
 
-  private final ParticipantRepository participantRepository;
+    private final ParticipantRepository participantRepository;
 
-  public String getCurrentUserId() {
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    if (auth == null || auth.getPrincipal() == null) {
-      throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
+    public String getCurrentUserId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getPrincipal() == null) {
+            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
+        }
+        Object principal = auth.getPrincipal();
+        if (!(principal instanceof String userId) || userId.isBlank()) {
+            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
+        }
+        return userId;
     }
-    Object principal = auth.getPrincipal();
-    if (!(principal instanceof String userId) || userId.isBlank()) {
-      throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
-    }
-    return userId;
-  }
 
-  public Long getCurrentParticipantId(Meeting meeting) {
-    String userId = getCurrentUserId();
-    Participant p = participantRepository
-        .findByUserIdAndMeeting(userId, meeting)
-        .orElseThrow(() -> new NotFoundException(ErrorCode.PARTICIPANT_NOT_FOUND));
-    return p.getId();
-  }
+    public Long getCurrentParticipantId(Meeting meeting) {
+        String userId = getCurrentUserId();
+        Participant p = participantRepository
+                .findByUserIdAndMeeting(userId, meeting)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PARTICIPANT_NOT_FOUND));
+        return p.getId();
+    }
 
 }

@@ -3,6 +3,7 @@ package com.ODG.ODG_back.exception.custom;
 import com.ODG.ODG_back.exception.ErrorCode;
 
 public class BadRequestException extends RuntimeException {
+
     private final ErrorCode errorCode;
 
     public BadRequestException(ErrorCode errorCode) {

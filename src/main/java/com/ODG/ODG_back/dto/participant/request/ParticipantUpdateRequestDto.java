@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 @Getter
 @AllArgsConstructor
 public class ParticipantUpdateRequestDto {
+
     private String name;
     private String address;
     private TransportType transportType;

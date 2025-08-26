@@ -27,7 +27,8 @@ public class RecommendedMidpoint {
     @ManyToOne
     private Midpoint midpoint;
 
-    public RecommendedMidpoint(Long id, double score, int rank, LocalDateTime recommendedAt, Meeting meeting, Midpoint midpoint) {
+    public RecommendedMidpoint(Long id, double score, int rank, LocalDateTime recommendedAt,
+            Meeting meeting, Midpoint midpoint) {
         this.id = id;
         this.score = score;
         this.rank = rank;

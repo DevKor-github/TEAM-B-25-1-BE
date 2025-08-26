@@ -15,8 +15,9 @@ public class MidpointController {
     private final MidpointService midpointService;
 
     @GetMapping
-    public ResponseEntity<MidpointResponseDto> getRecommendedMidpoints(@PathVariable String inviteCode,
-                                                                            @RequestParam MidpointStrategyType strategyType) {
+    public ResponseEntity<MidpointResponseDto> getRecommendedMidpoints(
+            @PathVariable String inviteCode,
+            @RequestParam MidpointStrategyType strategyType) {
         return ResponseEntity.ok(midpointService.getRecommendedMidpoints(inviteCode, strategyType));
     }
 

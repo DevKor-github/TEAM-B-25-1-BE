@@ -7,7 +7,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 
 @Mapper(componentModel = "spring")
-public interface ParticipantListResponseMapper{
+public interface ParticipantListResponseMapper {
+
     @Mappings({
             @Mapping(source = "id", target = "participantId"),
             @Mapping(source = "latitude", target = "lat"),

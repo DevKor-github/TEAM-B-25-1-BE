@@ -7,6 +7,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class GroupedPlacesResponse {
-  private List<PlaceSectionDto> sections;
+
+    private List<PlaceSectionDto> sections;
 
 }

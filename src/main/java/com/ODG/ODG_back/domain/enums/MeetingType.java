@@ -3,6 +3,7 @@ package com.ODG.ODG_back.domain.enums;
 import lombok.Getter;
 
 import java.util.List;
+
 import static com.ODG.ODG_back.domain.enums.PlaceCategory.*;
 
 @Getter

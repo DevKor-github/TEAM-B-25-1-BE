@@ -52,16 +52,16 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
         List<Participant> participants = meeting.getParticipants();
         // 목적지 = 모든 지하철역
         List<Midpoint> allMidpoints = midpointRepository.findAll();
-        log.info("Number of participants: {}, number of midpoints: {}", participants.size(), allMidpoints.size());
-
+        log.info("Number of participants: {}, number of midpoints: {}", participants.size(),
+                allMidpoints.size());
 
         List<Midpoint> candidates = hubNearCenter(participants, allMidpoints);
 
         TimeMatrix tm = buildTimeMatrix(participants, candidates);
         int[][] timeMatrix = tm.matrix();
         List<Participant> rowOrder = tm.rowOrder();
-        log.info("Time matrix dimensions: {} participants × {} midpoints", timeMatrix.length, timeMatrix[0].length);
-
+        log.info("Time matrix dimensions: {} participants × {} midpoints", timeMatrix.length,
+                timeMatrix[0].length);
 
         MidpointScore best = scoreMidpoints(timeMatrix, candidates, participants.size(), rowOrder);
         log.info("Best midpoint: {}, average time: {}", best.midpoint().getName(), best.avg());
@@ -72,28 +72,30 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
 
         saveRecommendedMidpoint(best, meeting);
         return midpointMapper.toDtoSelfOnly(
-            best.midpoint(),
-            best.avg(),
-            best.totalDeviation(),
-            currentPid,
-            selfTime,
-            participants.size()
+                best.midpoint(),
+                best.avg(),
+                best.totalDeviation(),
+                currentPid,
+                selfTime,
+                participants.size()
         );
     }
 
     private List<Midpoint> hubNearCenter(List<Participant> ps, List<Midpoint> stations) {
-        if (stations.size() <= 25) return stations;
+        if (stations.size() <= 25) {
+            return stations;
+        }
 
         double centerLat = ps.stream()
-            .map(Participant::getLatitude)
-            .mapToDouble(BigDecimal::doubleValue)
-            .average()
-            .orElse(0.0);
+                .map(Participant::getLatitude)
+                .mapToDouble(BigDecimal::doubleValue)
+                .average()
+                .orElse(0.0);
         double centerLon = ps.stream()
-            .map(Participant::getLongitude)
-            .mapToDouble(BigDecimal::doubleValue)
-            .average()
-            .orElse(0.0);
+                .map(Participant::getLongitude)
+                .mapToDouble(BigDecimal::doubleValue)
+                .average()
+                .orElse(0.0);
 
         ToDoubleFunction<Midpoint> hub = s -> {
             try {
@@ -105,40 +107,46 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
         };
 
         return stations.stream()
-            .sorted(Comparator.comparingDouble((Midpoint s) ->
-        -hub.applyAsDouble(s))
-                .thenComparingDouble(s -> haversine(centerLat, centerLon, s.getLatitude().doubleValue(), s.getLongitude().doubleValue()))
-            )
-            .limit(25)
-            .toList();
+                .sorted(Comparator.comparingDouble((Midpoint s) ->
+                                -hub.applyAsDouble(s))
+                        .thenComparingDouble(
+                                s -> haversine(centerLat, centerLon, s.getLatitude().doubleValue(),
+                                        s.getLongitude().doubleValue()))
+                )
+                .limit(25)
+                .toList();
     }
 
-    private record TimeMatrix(int[][] matrix, List<Participant> rowOrder) {}
+    private record TimeMatrix(int[][] matrix, List<Participant> rowOrder) {
+
+    }
 
     private TimeMatrix buildTimeMatrix(List<Participant> participants, List<Midpoint> candidates) {
 
-        List <String> destinations = candidates.stream()
+        List<String> destinations = candidates.stream()
                 .map(m -> m.getLatitude() + "," + m.getLongitude())
                 .toList();
         int[][] timeMatrix = new int[participants.size()][destinations.size()];
 
         // transportType 기준으로 그룹화하되, 키 순서를 안정화(TreeMap)하고, 각 그룹 내부는 id 기준으로 정렬
         Map<TransportType, List<Participant>> grouped = participants.stream()
-            .collect(groupingBy(Participant::getTransportType, TreeMap::new, java.util.stream.Collectors.toList()));
+                .collect(groupingBy(Participant::getTransportType, TreeMap::new,
+                        java.util.stream.Collectors.toList()));
         List<Participant> rowOrder = new ArrayList<>(participants.size());
 
         int rowIndex = 0;
 
         for (var entry : grouped.entrySet()) {
             List<Participant> group = entry.getValue().stream()
-                .sorted(Comparator.comparing(Participant::getId))
-                .toList();
+                    .sorted(Comparator.comparing(Participant::getId))
+                    .toList();
 
             List<String> origins = group.stream()
                     .map(p -> p.getLatitude() + "," + p.getLongitude())
                     .toList();
 
-            int[][] groupMatrix = matrixApiClient.getTimeMatrix(origins, destinations, entry.getKey());
+            int[][] groupMatrix = matrixApiClient.getTimeMatrix(origins, destinations,
+                    entry.getKey());
 
             for (int i = 0; i < group.size(); i++) {
                 timeMatrix[rowIndex] = groupMatrix[i];
@@ -149,7 +157,8 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
         return new TimeMatrix(timeMatrix, rowOrder);
     }
 
-    private MidpointScore scoreMidpoints(int[][] timeMatrix, List<Midpoint> midpoints, int numParticipants, List<Participant> rowOrder) {
+    private MidpointScore scoreMidpoints(int[][] timeMatrix, List<Midpoint> midpoints,
+            int numParticipants, List<Participant> rowOrder) {
         List<MidpointScore> scored = new ArrayList<>();
 
         for (int j = 0; j < midpoints.size(); j++) {
@@ -178,7 +187,9 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
 
     private int findRowIndex(List<Participant> rowOrder, Long pid) {
         for (int i = 0; i < rowOrder.size(); i++) {
-            if (rowOrder.get(i).getId().equals(pid)) return i;
+            if (rowOrder.get(i).getId().equals(pid)) {
+                return i;
+            }
         }
         throw new NotFoundException(ErrorCode.PARTICIPANT_NOT_FOUND);
     }
@@ -189,13 +200,14 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
         double dLon = Math.toRadians(lon2 - lon1);
         double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
                 Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c; // 거리 (km)
     }
 
     private void saveRecommendedMidpoint(MidpointScore best, Meeting meeting) {
-        log.info("Saving recommended midpoint: {}, average time: {}", best.midpoint().getName(), best.avg());
+        log.info("Saving recommended midpoint: {}, average time: {}", best.midpoint().getName(),
+                best.avg());
         RecommendedMidpoint recommended = new RecommendedMidpoint(
                 null,
                 best.avg(),
@@ -207,5 +219,8 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
         recommendedMidpointRepository.save(recommended);
     }
 
-    private record MidpointScore(Midpoint midpoint, double avg, double totalDeviation, int[] times) {}
+    private record MidpointScore(Midpoint midpoint, double avg, double totalDeviation,
+                                 int[] times) {
+
+    }
 }

@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 @Getter
 @AllArgsConstructor
 public class ParticipantRegisterRequestDto {
+
     private String name;
     private String address;
     private TransportType transportType;

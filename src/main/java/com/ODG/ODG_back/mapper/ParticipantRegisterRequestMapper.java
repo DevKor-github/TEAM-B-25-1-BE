@@ -9,7 +9,8 @@ import org.mapstruct.Mappings;
 import java.time.LocalDateTime;
 
 @Mapper(componentModel = "spring", imports = {LocalDateTime.class})
-public interface ParticipantRegisterRequestMapper{
+public interface ParticipantRegisterRequestMapper {
+
     @Mappings({
             @Mapping(source = "lat", target = "latitude"),
             @Mapping(source = "lng", target = "longitude"),

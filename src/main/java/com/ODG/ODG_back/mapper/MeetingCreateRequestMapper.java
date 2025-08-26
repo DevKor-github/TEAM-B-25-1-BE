@@ -9,7 +9,8 @@ import org.mapstruct.Mappings;
 import java.time.LocalDateTime;
 
 @Mapper(componentModel = "spring", imports = {LocalDateTime.class})
-public interface MeetingCreateRequestMapper{
+public interface MeetingCreateRequestMapper {
+
     @Mappings({
             @Mapping(source = "name", target = "title"),
             @Mapping(source = "purpose", target = "type"),

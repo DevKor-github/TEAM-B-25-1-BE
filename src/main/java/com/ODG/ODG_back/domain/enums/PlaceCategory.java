@@ -19,8 +19,8 @@ public enum PlaceCategory {
 
     public static PlaceCategory fromKakao(String code) {
         return Arrays.stream(values())
-            .filter(c -> c.kakaoCode.equalsIgnoreCase(code))
-            .findFirst()
-            .orElse(UNKNOWN);
+                .filter(c -> c.kakaoCode.equalsIgnoreCase(code))
+                .findFirst()
+                .orElse(UNKNOWN);
     }
 }

@@ -7,8 +7,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class PlaceSectionDto {
-  private PlaceSection key;
-  private String label;
-  private List<PlaceResponseDto> items;
+
+    private PlaceSection key;
+    private String label;
+    private List<PlaceResponseDto> items;
 
 }

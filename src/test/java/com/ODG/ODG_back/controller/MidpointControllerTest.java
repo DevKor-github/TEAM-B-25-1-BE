@@ -42,11 +42,12 @@ class MidpointControllerTest {
         MidpointResponseDto mockResponse = new MidpointResponseDto(
                 1L, "강남역", new BigDecimal("37.4979"), new BigDecimal("127.0276")
         );
-        given(midpointService.getRecommendedMidpoints(inviteCode, strategyType)).willReturn(mockResponse);
+        given(midpointService.getRecommendedMidpoints(inviteCode, strategyType)).willReturn(
+                mockResponse);
 
         // when & then
         mockMvc.perform(get("/meetings/{inviteCode}/midpoint", inviteCode)
-                    .param("strategyType", strategyType.name()))
+                        .param("strategyType", strategyType.name()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("강남역"))
                 .andExpect(jsonPath("$.latitude").value("37.4979"))

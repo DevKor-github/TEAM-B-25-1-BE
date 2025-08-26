@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-@Table(indexes = { @Index(name = "idx_meeting_invite_code", columnList = "inviteCode") })
+@Table(indexes = {@Index(name = "idx_meeting_invite_code", columnList = "inviteCode")})
 public class Meeting {
 
     @Id

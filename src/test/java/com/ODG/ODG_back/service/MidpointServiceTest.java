@@ -45,15 +45,16 @@ class MidpointServiceTest {
 
         MidpointResponseDto dummyResponse = new MidpointResponseDto(
                 1L, "광화문", BigDecimal.ONE, BigDecimal.TEN
-                );
+        );
 
         given(timeMatrixStrategy.calculateMidpoints(inviteCode)).willReturn(dummyResponse);
 
         // when
-        MidpointResponseDto result = midpointService.getRecommendedMidpoints(inviteCode, strategyType);
+        MidpointResponseDto result = midpointService.getRecommendedMidpoints(inviteCode,
+                strategyType);
 
         // then
         assertNotNull(result);
-        assertEquals("광화문", result.getName() );
+        assertEquals("광화문", result.getName());
     }
 }

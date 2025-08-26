@@ -9,7 +9,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(indexes = { @Index(name = "idx_start_end", columnList = "start,end") })
+@Table(indexes = {@Index(name = "idx_start_end", columnList = "start,end")})
 public class SubwayDurationTime {
 
     @Id

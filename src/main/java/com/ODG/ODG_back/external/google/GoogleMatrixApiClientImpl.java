@@ -21,24 +21,28 @@ public class GoogleMatrixApiClientImpl implements GoogleMatrixApiClient {
     private final String googleApiKey;
     private final WebClient webClient;
 
-    public GoogleMatrixApiClientImpl(WebClient.Builder builder, @Value("${google.api-key}") String googleApiKey) {
+    public GoogleMatrixApiClientImpl(WebClient.Builder builder,
+            @Value("${google.api-key}") String googleApiKey) {
         this.webClient = builder.build();
         this.googleApiKey = googleApiKey;
     }
 
     @Override
-    public int[][] getTimeMatrix(List<String> origins, List<String> destinations, TransportType transport) {
+    public int[][] getTimeMatrix(List<String> origins, List<String> destinations,
+            TransportType transport) {
 
         int numOrigins = origins.size();
         int numDestinations = destinations.size();
-        log.info("getTimeMatrix: origins={}, destinations={}, transport={}", numOrigins, numDestinations, transport);
+        log.info("getTimeMatrix: origins={}, destinations={}, transport={}", numOrigins,
+                numDestinations, transport);
 
         int maxElements = 100;
         if (numOrigins * numDestinations > maxElements) {
             int maxDestPerBatch = Math.max(1, maxElements / numOrigins);
             // Split destinations into chunks of maxDestPerBatch
             int numChunks = (numDestinations + maxDestPerBatch - 1) / maxDestPerBatch;
-            log.info("Batching Distance Matrix API requests: {} chunks, chunk size up to {}", numChunks, maxDestPerBatch);
+            log.info("Batching Distance Matrix API requests: {} chunks, chunk size up to {}",
+                    numChunks, maxDestPerBatch);
 
             int[][] resultMatrix = new int[numOrigins][numDestinations];
             int destStart = 0;
@@ -48,7 +52,8 @@ public class GoogleMatrixApiClientImpl implements GoogleMatrixApiClient {
                 List<String> destChunk = destinations.subList(destStart, destEnd);
                 String url = buildUrl(origins, destChunk, transport);
                 int elementsCount = numOrigins * destChunk.size();
-                log.info("Requesting chunk {}: elements={}, destinations {}-{}", chunkIdx + 1, elementsCount, destStart, destEnd - 1);
+                log.info("Requesting chunk {}: elements={}, destinations {}-{}", chunkIdx + 1,
+                        elementsCount, destStart, destEnd - 1);
                 Map<String, Object> response = fetchApiResponse(url);
                 log.info("Received response from Distance Matrix API: {}", response);
 
@@ -60,7 +65,8 @@ public class GoogleMatrixApiClientImpl implements GoogleMatrixApiClient {
                 int[][] chunkMatrix = parseTimeMatrix(response, numOrigins, destChunk.size());
                 // Copy chunkMatrix into resultMatrix
                 for (int i = 0; i < numOrigins; i++) {
-                    System.arraycopy(chunkMatrix[i], 0, resultMatrix[i], destStart, destChunk.size());
+                    System.arraycopy(chunkMatrix[i], 0, resultMatrix[i], destStart,
+                            destChunk.size());
                 }
                 destStart = destEnd;
                 chunkIdx++;
@@ -81,7 +87,8 @@ public class GoogleMatrixApiClientImpl implements GoogleMatrixApiClient {
         }
     }
 
-    private String buildUrl(List<String> origins, List<String> destinations, TransportType transport) {
+    private String buildUrl(List<String> origins, List<String> destinations,
+            TransportType transport) {
 
         String originsParam = String.join("|", origins);
         String destinationsParam = String.join("|", destinations);
@@ -105,7 +112,8 @@ public class GoogleMatrixApiClientImpl implements GoogleMatrixApiClient {
                     .block();
         } catch (WebClientException e) {
             log.error("Error fetching Distance Matrix API response", e);
-            throw new ExternalApiException(ErrorCode.EXTERNAL_API_CONNECTION_FAILED, e.getMessage());
+            throw new ExternalApiException(ErrorCode.EXTERNAL_API_CONNECTION_FAILED,
+                    e.getMessage());
         }
     }
 }
