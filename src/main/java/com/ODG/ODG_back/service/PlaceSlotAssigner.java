@@ -41,7 +41,7 @@ public class PlaceSlotAssigner {
                     BigDecimal.valueOf(doc.getX()),
                     doc.getAddress_name(),
                     base + i,
-                    doc.place_url
+                    doc.getPlace_url()
             ));
         }
         return items;

@@ -105,56 +105,84 @@ public class VoteService {
             if (seed == null) continue;
 
             // 3) seedParams 역직렬화 (파싱 실패 시 건너뜀)
-            SeedParams params;
-            try {
-                params = objectMapper.readValue(seed.getSeedParamsJson(), SeedParams.class);
-                log.info("Parsed SeedParams: {}", params);
-            } catch (JsonProcessingException e) {
-                continue;
-            }
+            SeedParams params = parseSeedParams(seed);
+            if (params == null) continue;
 
             // 4) seed로 재조회
-            List<KakaoLocalClient.KakaoPlaceDoc> docs;
-            if ("category".equalsIgnoreCase(params.getType())) {
-                String code = (params.getCodes() != null && !params.getCodes().isEmpty()) ? params.getCodes().get(0) : null;
-                if (code == null) continue;
-                docs = kakaoLocalClient.searchCategory(code, params.getLat(), params.getLng(),
-                        params.getRadius(), params.getPage(), params.getSize());
-            } else {
-                docs = kakaoLocalClient.searchKeyword(params.getKeyword(), params.getLat(), params.getLng(),
-                        params.getRadius(), params.getPage(), params.getSize());
-            }
-            log.info("KakaoLocalClient returned {} docs", (docs == null ? 0 : docs.size()));
+            List<KakaoLocalClient.KakaoPlaceDoc> docs = fetchDocsBySeed(params);
             if (docs == null || docs.isEmpty()) continue;
 
-            // 5) 거리 정렬 후 pickIndex(없으면 0) 선택
-            docs.sort(Comparator.comparingDouble(d ->
-                    haversine(params.getLat(), params.getLng(), d.getY(), d.getX())));
-            int idx = Optional.ofNullable(params.getPickIndex()).orElse(0);
-            if (idx < 0 || idx >= docs.size()) {
-                idx = Math.max(0, docs.size() - 1);
-            }
-            KakaoLocalClient.KakaoPlaceDoc chosen = docs.get(idx);
+
+            // 5) 선택 규칙
+            KakaoPlaceDoc chosen = chooseDoc(params, docs, slotNo);
+            if (chosen == null) continue;
 
             // 6) DTO로 추가 (저장 X)
-            finalPlaces.add(new PlaceResponseDto(
-                    chosen.getId(),
-                    chosen.getPlace_name(),
-                    PlaceCategory.fromKakao(chosen.getCategory_group_code()),
-                    BigDecimal.valueOf(chosen.getY()),
-                    BigDecimal.valueOf(chosen.getX()),
-                    chosen.getAddress_name(),
-                    slotNo,
-                    chosen.getPlace_url()
-            ));
-            log.info("Chosen place id: {}, name: {}", chosen.getId(), chosen.getPlace_name());
+            PlaceResponseDto dto = toDto(chosen, slotNo);
+            finalPlaces.add(dto);
         }
 
         if (finalPlaces.isEmpty()) {
             throw new NotFoundException(ErrorCode.PLACE_NOT_FOUND);
         }
-
         return finalPlaces;
+    }
 
+
+    private SeedParams parseSeedParams(Place seed) {
+        try {
+            SeedParams params = objectMapper.readValue(seed.getSeedParamsJson(), SeedParams.class);
+            log.info("Parsed SeedParams: {}", params);
+            return params;
+        } catch (JsonProcessingException e) {
+            log.warn("Failed to parse SeedParams for place id={}: {}", seed.getId(), e.getMessage());
+            return null;
+        }
+    }
+
+    private List<KakaoPlaceDoc> fetchDocsBySeed(SeedParams params) {
+        if (params == null) return null;
+        List<KakaoPlaceDoc> docs;
+        if ("category".equalsIgnoreCase(params.getType())) {
+            String code = (params.getCodes() != null && !params.getCodes().isEmpty()) ? params.getCodes().get(0) : null;
+            if (code == null) return null;
+            docs = kakaoLocalClient.searchCategory(code, params.getLat(), params.getLng(),
+                    params.getRadius(), params.getPage(), params.getSize());
+        } else {
+            docs = kakaoLocalClient.searchKeyword(params.getKeyword(), params.getLat(), params.getLng(),
+                    params.getRadius(), params.getPage(), params.getSize());
+        }
+        if (docs == null || docs.isEmpty()) return null;
+        docs.sort(Comparator.comparingDouble(d ->
+                        haversine(params.getLat(), params.getLng(), d.getY(), d.getX())));
+        log.info("KakaoLocalClient returned {} docs after sorting", docs.size());
+        return docs;
+    }
+
+    private KakaoPlaceDoc chooseDoc(SeedParams params, List<KakaoPlaceDoc> docs, int slotNo) {
+        if (params == null || docs == null || docs.isEmpty()) return null;
+        int idx = slotNo % 1000;
+        // idx 범위 보정
+        if (idx < 0 || idx >= docs.size()) {
+            idx = Math.max(0, Math.min(docs.size() - 1, idx));
+        }
+        KakaoPlaceDoc chosen = docs.get(idx);
+        log.info("Choosing doc for slotNo={} (sectionIdx={}), chosen placeId={}, name={}",
+                slotNo, idx, chosen.getId(), chosen.getPlace_name());
+        return chosen;
+    }
+
+    private PlaceResponseDto toDto(KakaoPlaceDoc chosen, int slotNo) {
+        if (chosen == null) return null;
+        return new PlaceResponseDto(
+                chosen.getId(),
+                chosen.getPlace_name(),
+                PlaceCategory.fromKakao(chosen.getCategory_group_code()),
+                BigDecimal.valueOf(chosen.getY()),
+                BigDecimal.valueOf(chosen.getX()),
+                chosen.getAddress_name(),
+                slotNo,
+                chosen.getPlace_url()
+        );
     }
 }

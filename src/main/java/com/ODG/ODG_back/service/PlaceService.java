@@ -20,6 +20,7 @@ import com.ODG.ODG_back.repository.PlaceRepository;
 import com.ODG.ODG_back.repository.RecommendedMidpointRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +49,7 @@ public class PlaceService {
     );
     private static final String STUDY_KEYWORD = "스터디카페";
 
+    @Transactional
     public GroupedPlacesResponse getPlacesByMidpointGrouped(String inviteCode, int radius, int page,
             int size) {
         log.info(
@@ -63,6 +65,10 @@ public class PlaceService {
                         meeting)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.RECOMMENDED_MIDPOINT_NOT_FOUND));
         Midpoint midpoint = recommendedMidpoint.getMidpoint();
+
+        long deleted = placeRepository.deleteByMeeting(meeting);
+        log.info("[PlaceService] Cleared {} existing place candidates for meeting id={}",
+                deleted, meeting.getId());
 
         double lat = midpoint.getLatitude().doubleValue();
         double lng = midpoint.getLongitude().doubleValue();

@@ -13,4 +13,6 @@ public interface PlaceRepository extends JpaRepository<Place, Long> {
     Optional<Place> findByMeetingAndSlotNo(Meeting meeting, Integer slotNo);
 
     List<Place> findAllByMeeting(Meeting meeting);
+
+    long deleteByMeeting(Meeting meeting);
 }

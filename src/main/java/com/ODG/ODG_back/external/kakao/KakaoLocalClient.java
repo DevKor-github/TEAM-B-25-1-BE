@@ -59,7 +59,7 @@ public class KakaoLocalClient {
                 query, lat, lng, radius, page, size);
 
         KakaoResp resp = webClient.get()
-                .uri(uri -> uri.path("/v2/local/search/category.json")
+                .uri(uri -> uri.path("/v2/local/search/keyword.json")
                         .queryParam("query", query)
                         .queryParam("x", lng) // longitude
                         .queryParam("y", lat) // latitude
