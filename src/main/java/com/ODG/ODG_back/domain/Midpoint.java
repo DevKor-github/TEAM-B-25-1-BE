@@ -35,6 +35,4 @@ public class Midpoint {
         return hubScore == null ? 0.0 : hubScore;
     }
 
-    @ManyToMany(mappedBy = "midpoints")
-    private List<Place> places;
 }

@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class VoteResultDto {
-    private Long placeId;
-    private String name;
+
+    private int slotNo;
     private Long voteCount;
 }

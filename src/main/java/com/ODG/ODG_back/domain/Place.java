@@ -1,32 +1,48 @@
 package com.ODG.ODG_back.domain;
 
-import com.ODG.ODG_back.domain.enums.PlaceCategory;
+import com.ODG.ODG_back.dto.place.response.PlaceSection;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 
-import java.math.BigDecimal;
-import java.util.List;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Table(name = "place",
+        uniqueConstraints = @UniqueConstraint(name = "uk_meeting_slot", columnNames = {"meeting_id", "slot_no"}))
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Place {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
-    private String placeId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "meeting_id", nullable = false)
+    private Meeting meeting;
 
-    private String name;
+    @Column(name = "slot_no", nullable = false)
+    private Integer slotNo;
 
     @Enumerated(EnumType.STRING)
-    private PlaceCategory category;
-    @Column(precision = 15, scale = 8)
-    private BigDecimal latitude;
-    @Column(precision = 15, scale = 8)
-    private BigDecimal longitude;
+    @Column(name = "section", nullable = false)
+    private PlaceSection section;
 
-    @ManyToMany
-    private List<Midpoint> midpoints;
+    @Column(name = "query_type", nullable = false)
+    private String queryType;
+
+    @Column(name = "seed_params_json", nullable = false, columnDefinition = "json")
+    private String seedParamsJson;
+
+    @Builder
+    public Place(Meeting meeting, Integer slotNo, PlaceSection section, String queryType, String seedParamsJson) {
+        this.meeting = meeting;
+        this.slotNo = slotNo;
+        this.section = section;
+        this.queryType = queryType;
+        this.seedParamsJson = seedParamsJson;
+    }
+
 }

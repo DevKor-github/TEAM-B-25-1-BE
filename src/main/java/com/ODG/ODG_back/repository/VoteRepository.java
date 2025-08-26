@@ -13,9 +13,20 @@ import java.util.List;
 import java.util.Optional;
 
 public interface VoteRepository extends JpaRepository<Vote, Long> {
-    Optional<Vote> findByMeetingAndPlaceAndParticipant(Meeting meeting, Place place, Participant participant);
 
-    @Query("SELECT new com.ODG.ODG_back.dto.vote.response.VoteResultDto(v.place.id, v.place.name, SUM(v.voteValue)) " +
-            "FROM Vote v WHERE v.meeting = :meeting GROUP BY v.place")
+//    @Query("SELECT new com.ODG.ODG_back.dto.vote.response.VoteResultDto(v.place.id, v.place.name, SUM(v.voteValue)) " +
+//            "FROM Vote v WHERE v.meeting = :meeting GROUP BY v.place")
+//    List<VoteResultDto> findVoteCountsByMeeting(@Param("meeting") Meeting meeting);
+
+    @Query("""
+                    SELECT new com.ODG.ODG_back.dto.vote.response.VoteResultDto(v.slotNo, COUNT(v)) 
+                    FROM Vote v 
+                    WHERE v.meeting = :meeting 
+                    GROUP BY v.slotNo 
+                    ORDER BY COUNT(v) DESC
+            """)
     List<VoteResultDto> findVoteCountsByMeeting(@Param("meeting") Meeting meeting);
+
+    Optional<Vote> findByMeetingAndSlotNoAndParticipant(Meeting meeting, Integer slotNo,
+            Participant participant);
 }

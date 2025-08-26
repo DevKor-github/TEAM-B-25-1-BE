@@ -23,18 +23,19 @@ public class Vote {
 
     private LocalDateTime votedAt;
 
+    @Column(nullable = false)
+    private Integer slotNo;
+
     @ManyToOne
     private Meeting meeting;
 
     @ManyToOne
-    private Place place;
-
-    @ManyToOne
     private Participant participant;
 
-    public Vote(Meeting meeting, Place place, Participant participant) {
+    public Vote(Meeting meeting, Integer slotNo, Participant participant) {
         this.meeting = meeting;
-        this.place = place;
+        this.slotNo = slotNo;
+//        this.place = place;
         this.participant = participant;
         this.voteValue = 1; // 새 투표 시 voteValue를 1로 고정
         this.votedAt = LocalDateTime.now(); // 투표 생성 시간 설정
