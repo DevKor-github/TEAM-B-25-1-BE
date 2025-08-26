@@ -24,9 +24,9 @@ public class PlaceSlotAssigner {
     );
 
     public List<PlaceResponseDto> assignAndBuild(
-            PlaceSection section, double cneterLat, double centerLng, List<KakaoPlaceDoc> docs) {
+            PlaceSection section, double centerLat, double centerLng, List<KakaoPlaceDoc> docs) {
         List<KakaoPlaceDoc> sorted = docs.stream()
-                .sorted(Comparator.comparingDouble(d -> haversine(cneterLat, centerLng, d.getY(), d.getX())))
+                .sorted(Comparator.comparingDouble(d -> haversine(centerLat, centerLng, d.getY(), d.getX())))
                 .toList();
 
         List<PlaceResponseDto> items = new ArrayList<>(sorted.size());

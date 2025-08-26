@@ -29,4 +29,6 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
 
     Optional<Vote> findByMeetingAndSlotNoAndParticipant(Meeting meeting, Integer slotNo,
             Participant participant);
+
+    int deleteByMeeting(Meeting meeting);
 }
