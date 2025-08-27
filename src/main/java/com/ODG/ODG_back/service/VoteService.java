@@ -1,7 +1,5 @@
 package com.ODG.ODG_back.service;
 
-import static com.ODG.ODG_back.service.PlaceSlotAssigner.haversine;
-
 import com.ODG.ODG_back.domain.Meeting;
 import com.ODG.ODG_back.domain.Participant;
 import com.ODG.ODG_back.domain.Place;
@@ -11,7 +9,6 @@ import com.ODG.ODG_back.dto.place.SeedParams;
 import com.ODG.ODG_back.dto.place.response.PlaceResponseDto;
 import com.ODG.ODG_back.dto.vote.request.VoteRequestDto;
 import com.ODG.ODG_back.dto.vote.response.VoteResultDto;
-import com.ODG.ODG_back.dto.vote.response.VoteResultResponse;
 import com.ODG.ODG_back.exception.ErrorCode;
 import com.ODG.ODG_back.exception.custom.NotFoundException;
 import com.ODG.ODG_back.external.kakao.KakaoLocalClient;
@@ -24,7 +21,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Comparator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -47,38 +43,47 @@ public class VoteService {
     private final KakaoLocalClient kakaoLocalClient;
     private final ObjectMapper objectMapper;
 
-    public void vote(String inviteCode, String userId, VoteRequestDto voteRequestDto) {
+    // --- Lightweight response DTOs for instant UI patching ---
+    public record VotePatchDto(Integer slotNo, boolean votedByMe) {}
+    public record VoteInstantResponse(List<Integer> myVoteSlotNos, List<VotePatchDto> patches) {}
+
+    public VoteInstantResponse vote(String inviteCode, String userId, VoteRequestDto voteRequestDto) {
         Meeting meeting = meetingRepository.findByInviteCode(inviteCode)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.MEETING_NOT_FOUND));
-        log.info("Fetched Meeting with inviteCode: {}, meetingId: {}", inviteCode, meeting.getId());
-//        Place place = placeRepository.findById(voteRequestDto.getPlaceId())
-//                .orElseThrow(() -> new NotFoundException(ErrorCode.PLACE_NOT_FOUND));
         Participant participant = participantRepository.findByUserId(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PARTICIPANT_NOT_FOUND));
-        log.info("Fetched Participant with userId: {}, participantId: {}", userId, participant.getId());
 
-        Integer slotNo = voteRequestDto.getSlotNo();
-        if (slotNo == null) {
-            throw new NotFoundException(ErrorCode.PLACE_NOT_FOUND);
-        }
-        log.info("Retrieved slotNo: {}", slotNo);
+        Integer slotNo = Optional.ofNullable(voteRequestDto.getSlotNo())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PLACE_NOT_FOUND));
 
-
+        // 슬롯 존재 검증
         placeRepository.findByMeetingAndSlotNo(meeting, slotNo)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PLACE_NOT_FOUND));
-        log.info("Checking for existing vote with meetingId: {}, slotNo: {}, participantId: {}", meeting.getId(), slotNo, participant.getId());
 
-        Optional<Vote> existingVote = voteRepository.findByMeetingAndSlotNoAndParticipant(meeting,
-                slotNo, participant);
+        // 토글 처리
+        Optional<Vote> existingVote = voteRepository.findByMeetingAndSlotNoAndParticipant(meeting, slotNo, participant);
+        boolean nowVoted;
         if (existingVote.isEmpty()) {
-            Vote newVote = new Vote(meeting, slotNo, participant);
-            voteRepository.save(newVote);
-            log.info("Created a new vote for slotNo: {}", slotNo);
+            voteRepository.save(new Vote(meeting, slotNo, participant));
+            nowVoted = true;
+            log.info("[vote] VOTED  slotNo={} (participantId={})", slotNo, participant.getId());
         } else {
             voteRepository.delete(existingVote.get());
-            log.info("Removed existing vote for slotNo: {}", slotNo);
+            nowVoted = false;
+            log.info("[vote] UNVOTED slotNo={} (participantId={})", slotNo, participant.getId());
         }
+
+        // 내 현재 전체 투표 슬롯들 재계산 (동기화용)
+        List<Integer> myVoteSlotNos = voteRepository.findAllByMeetingAndParticipant(meeting, participant)
+                .stream()
+                .map(Vote::getSlotNo)
+                .toList();
+
+        // 이번 요청으로 바뀐 것만 패치로 반환
+        List<VotePatchDto> patches = List.of(new VotePatchDto(slotNo, nowVoted));
+        return new VoteInstantResponse(myVoteSlotNos, patches);
     }
+
 
     public List<PlaceResponseDto> getVoteResults(String inviteCode) {
         Meeting meeting = meetingRepository.findByInviteCode(inviteCode)
@@ -112,7 +117,6 @@ public class VoteService {
             List<KakaoLocalClient.KakaoPlaceDoc> docs = fetchDocsBySeed(params);
             if (docs == null || docs.isEmpty()) continue;
 
-
             // 5) 선택 규칙
             KakaoPlaceDoc chosen = chooseDoc(params, docs, slotNo);
             if (chosen == null) continue;
@@ -143,32 +147,52 @@ public class VoteService {
     private List<KakaoPlaceDoc> fetchDocsBySeed(SeedParams params) {
         if (params == null) return null;
         List<KakaoPlaceDoc> docs;
+
+        int page = (params.getPage() > 0) ? params.getPage() : 1;
+        int size = (params.getSize() > 0) ? params.getSize() : 15;
+
         if ("category".equalsIgnoreCase(params.getType())) {
-            String code = (params.getCodes() != null && !params.getCodes().isEmpty()) ? params.getCodes().get(0) : null;
-            if (code == null) return null;
-            docs = kakaoLocalClient.searchCategory(code, params.getLat(), params.getLng(),
-                    params.getRadius(), params.getPage(), params.getSize());
+            List<String> codes = (params.getCodes() != null) ? params.getCodes() : List.of();
+            if (codes.isEmpty()) return null;
+
+            if (codes.size() == 1) {
+                String code = codes.get(0);
+                docs = kakaoLocalClient.searchCategory(code, params.getLat(), params.getLng(),
+                        params.getRadius(), page, size);
+            } else {
+                // Concatenate per-code results in order: code[0] then code[1]
+                List<KakaoPlaceDoc> merged = new ArrayList<>(size * codes.size());
+                for (String code : codes) {
+                    List<KakaoPlaceDoc> one = kakaoLocalClient.searchCategory(code, params.getLat(), params.getLng(),
+                            params.getRadius(), page, size);
+                    if (one != null && !one.isEmpty()) merged.addAll(one);
+                }
+                docs = merged;
+            }
         } else {
             docs = kakaoLocalClient.searchKeyword(params.getKeyword(), params.getLat(), params.getLng(),
-                    params.getRadius(), params.getPage(), params.getSize());
+                    params.getRadius(), page, size);
         }
-        if (docs == null || docs.isEmpty()) return null;
-        docs.sort(Comparator.comparingDouble(d ->
-                        haversine(params.getLat(), params.getLng(), d.getY(), d.getX())));
-        log.info("KakaoLocalClient returned {} docs after sorting", docs.size());
+
+        if (docs == null) return null;
+
+        log.info("KakaoLocalClient returned {} docs after merge+distance-sort (page={}, size={})", docs.size(), page, size);
         return docs;
     }
 
     private KakaoPlaceDoc chooseDoc(SeedParams params, List<KakaoPlaceDoc> docs, int slotNo) {
         if (params == null || docs == null || docs.isEmpty()) return null;
-        int idx = slotNo % 1000;
-        // idx 범위 보정
-        if (idx < 0 || idx >= docs.size()) {
-            idx = Math.max(0, Math.min(docs.size() - 1, idx));
-        }
+
+        int size = (params.getSize() > 0) ? params.getSize() : 15;
+        int codes = (params.getCodes() != null && !params.getCodes().isEmpty()) ? params.getCodes().size() : 1;
+
+        int slotOffset = Math.floorMod(slotNo, 1000);
+        int idx = slotOffset % (size * codes);
+        idx = Math.max(0, Math.min(idx, docs.size() - 1));
+
         KakaoPlaceDoc chosen = docs.get(idx);
-        log.info("Choosing doc for slotNo={} (sectionIdx={}), chosen placeId={}, name={}",
-                slotNo, idx, chosen.getId(), chosen.getPlace_name());
+        log.info("Choosing doc for slotNo={} (slotOffset={}, idx={}), chosen placeId={}, name={}",
+                slotNo, slotOffset, idx, chosen.getId(), chosen.getPlace_name());
         return chosen;
     }
 

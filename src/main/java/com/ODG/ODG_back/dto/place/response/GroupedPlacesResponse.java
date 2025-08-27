@@ -9,5 +9,8 @@ import lombok.Getter;
 public class GroupedPlacesResponse {
 
     private List<PlaceSectionDto> sections;
+    private final List<Integer> myVoteSlotNos; // nullable
+    private final Integer page;         // nullable
+    private final Boolean hasMore;      // nullable
 
 }

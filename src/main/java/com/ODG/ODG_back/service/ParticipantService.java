@@ -83,4 +83,10 @@ public class ParticipantService {
     public List<ParticipantListResponseDto> getParticipantsWithVoteStatus(String linkCode) {
         return participantRepository.findParticipantsWithVoteStatus(linkCode);
     }
+
+    public Long getParticipantId(String userId) {
+        Participant participant = participantRepository.findByUserId(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PARTICIPANT_NOT_FOUND));
+        return participant.getId();
+    }
 }

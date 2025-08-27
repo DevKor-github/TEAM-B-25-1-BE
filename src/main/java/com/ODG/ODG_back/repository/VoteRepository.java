@@ -5,6 +5,8 @@ import com.ODG.ODG_back.domain.Participant;
 import com.ODG.ODG_back.domain.Place;
 import com.ODG.ODG_back.domain.Vote;
 import com.ODG.ODG_back.dto.vote.response.VoteResultDto;
+import java.nio.channels.FileChannel;
+import javax.swing.text.html.Option;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -31,4 +33,8 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
             Participant participant);
 
     int deleteByMeeting(Meeting meeting);
+
+    Optional<Vote> findByMeetingAndParticipant(Meeting meeting, Participant participant);
+
+    List<Vote> findAllByMeetingAndParticipant(Meeting meeting, Participant participant);
 }

@@ -24,15 +24,13 @@ public class PlaceSlotAssigner {
     );
 
     public List<PlaceResponseDto> assignAndBuild(
-            PlaceSection section, double centerLat, double centerLng, List<KakaoPlaceDoc> docs) {
-        List<KakaoPlaceDoc> sorted = docs.stream()
-                .sorted(Comparator.comparingDouble(d -> haversine(centerLat, centerLng, d.getY(), d.getX())))
-                .toList();
+            PlaceSection section, double centerLat, double centerLng,
+            List<KakaoPlaceDoc> docs, int startSlotNo) {
 
-        List<PlaceResponseDto> items = new ArrayList<>(sorted.size());
-        int base = SECTION_BASE.getOrDefault(section, 9000);
-        for (int i = 0; i < sorted.size(); i++) {
-            KakaoPlaceDoc doc = sorted.get(i);
+        List<PlaceResponseDto> items = new ArrayList<>(docs.size());
+
+        for (int i = 0; i < docs.size(); i++) {
+            KakaoPlaceDoc doc = docs.get(i);
             items.add(new PlaceResponseDto(
                     doc.getId(),
                     doc.getPlace_name(),
@@ -40,12 +38,14 @@ public class PlaceSlotAssigner {
                     BigDecimal.valueOf(doc.getY()),
                     BigDecimal.valueOf(doc.getX()),
                     doc.getAddress_name(),
-                    base + i,
-                    doc.getPlace_url()
+                    startSlotNo + i, // ✅ 주어진 시작 슬롯부터 연속 할당
+                    doc.getPlace_url(),
+                    false
             ));
         }
         return items;
     }
+
 
     static double haversine(double lat1, double lng1, double lat2, double lng2) {
         double R=6371000d, dLat=Math.toRadians(lat2-lat1), dLng=Math.toRadians(lng2-lng1);
