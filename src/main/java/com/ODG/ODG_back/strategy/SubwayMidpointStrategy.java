@@ -30,8 +30,6 @@ import static java.util.stream.Collectors.groupingBy;
 @RequiredArgsConstructor
 @Slf4j
 public class SubwayMidpointStrategy implements MidpointStrategy {
-    private final MeetingRepository meetingRepository;
-    private final RecommendedMidpointRepository recommendedMidpointRepository;
     private final MidpointRepository midpointRepository;
     private final MidpointMapper midpointMapper;
     private final SubwayDurationTimeRepository timeRepository; // 지하철역간 이동 시간 저장소
@@ -40,12 +38,9 @@ public class SubwayMidpointStrategy implements MidpointStrategy {
 
 
     @Override
-    public MidpointResponseDto calculateMidpoints(String inviteCode) {
-        log.info("Calculating midpoints for inviteCode: {}", inviteCode);
+    public MidpointScoreWithMeta calculateMidpoints(Meeting meeting) {
+        log.info("Calculating midpoints for inviteCode: {}", meeting.getInviteCode());
 
-        Meeting meeting = meetingRepository.findByInviteCode(inviteCode).orElseThrow(
-                () -> new NotFoundException(ErrorCode.MEETING_NOT_FOUND)
-        );
         // 출발지 = 참가자 위치
         List<Participant> participants = meeting.getParticipants();
         // 목적지 = 모든 지하철역
@@ -68,11 +63,8 @@ public class SubwayMidpointStrategy implements MidpointStrategy {
         int rowIndex = findRowIndex(rowOrder, currentPid);
         int selfTime = best.times()[rowIndex];
 
-        saveRecommendedMidpoint(best, meeting);
-        return midpointMapper.toDtoSelfOnly(
-                best.midpoint(),
-                best.avg(),
-                best.totalDeviation(),
+        return new MidpointScoreWithMeta(
+                best,
                 currentPid,
                 selfTime,
                 participants.size()
@@ -149,7 +141,7 @@ public class SubwayMidpointStrategy implements MidpointStrategy {
                                 candidates.get(j)
                         );
 
-                        groupMatrix[i][j] = durationTime.getShortestDurationTime() + getWalkTimeToStation(participants.get(i), getNearbySubwayStationMidpoint(participants.get(i)));
+                        groupMatrix[i][j] = durationTime.getShortestDurationTime() * 60 + getWalkTimeToStation(participants.get(i), getNearbySubwayStationMidpoint(participants.get(i)));
                     }
                 }
             }
@@ -166,7 +158,7 @@ public class SubwayMidpointStrategy implements MidpointStrategy {
     private int getWalkTimeToStation(Participant p, Midpoint m) {
         double distance = haversine(p.getLatitude().doubleValue(), p.getLongitude().doubleValue(),
                 m.getLatitude().doubleValue(), m.getLongitude().doubleValue());
-        return (int) ((distance * 1000) / 80); // 도보 속도 80m/min 가정
+        return (int) ((distance * 1000) / 80) * 60; // 도보 속도 80m/min 가정
     }
 
     public SubwayDurationTime getDurationInfo(
@@ -191,17 +183,5 @@ public class SubwayMidpointStrategy implements MidpointStrategy {
         }
 
         return durationTime.get();
-    }
-
-    private void saveRecommendedMidpoint(MidpointScore best, Meeting meeting) {
-        RecommendedMidpoint recommended = new RecommendedMidpoint(
-                null,
-                best.avg(),
-                1,
-                LocalDateTime.now(),
-                meeting,
-                best.midpoint()
-        );
-        recommendedMidpointRepository.save(recommended);
     }
 }

@@ -1,6 +1,11 @@
 package com.ODG.ODG_back.service;
 
+import com.ODG.ODG_back.domain.Meeting;
+import com.ODG.ODG_back.domain.Midpoint;
 import com.ODG.ODG_back.dto.midpoint.response.MidpointResponseDto;
+import com.ODG.ODG_back.mapper.MidpointMapper;
+import com.ODG.ODG_back.repository.MeetingRepository;
+import com.ODG.ODG_back.repository.RecommendedMidpointRepository;
 import com.ODG.ODG_back.strategy.MidpointStrategy;
 import com.ODG.ODG_back.strategy.MidpointStrategyType;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +30,14 @@ class MidpointServiceTest {
     @Mock
     private MidpointStrategy subwayStrategy;
 
+    @Mock
+    private RecommendedMidpointRepository recommendedMidpointRepository;
+
+    @Mock
+    private MeetingRepository meetingRepository;
+
+    @Mock
+    private MidpointMapper midpointMapper;
     private MidpointService midpointService;
 
     @BeforeEach
@@ -33,7 +46,7 @@ class MidpointServiceTest {
                 "timeMatrixStrategy", timeMatrixStrategy,
                 "subwayStrategy", subwayStrategy
         );
-        midpointService = new MidpointService(strategyMap);
+        midpointService = new MidpointService(strategyMap, recommendedMidpointRepository, meetingRepository, midpointMapper);
     }
 
     @Test
@@ -42,12 +55,29 @@ class MidpointServiceTest {
         //given
         String inviteCode = "abc123";
         MidpointStrategyType strategyType = MidpointStrategyType.TIME_MATRIX;
+        Meeting meeting = new Meeting();
+        Midpoint midpoint = new Midpoint(
+                1L,
+                "광화문",
+                new BigDecimal("37.5713"),
+                new BigDecimal("126.9768"),
+                "02-123-4567",
+                10.0
+        );
+        int[] times = new int[]{10, 10, 10};
 
-        MidpointResponseDto dummyResponse = new MidpointResponseDto(
-                1L, "광화문", BigDecimal.ONE, BigDecimal.TEN
+        MidpointStrategy.MidpointScore dummyScore = new MidpointStrategy.MidpointScore(
+                midpoint,10,10,times
         );
 
-        given(timeMatrixStrategy.calculateMidpoints(inviteCode)).willReturn(dummyResponse);
+        MidpointStrategy.MidpointScoreWithMeta dummyResponse = new MidpointStrategy.MidpointScoreWithMeta(
+                dummyScore,
+                1L,
+                10,
+                3
+        );
+
+        given(timeMatrixStrategy.calculateMidpoints(meeting)).willReturn(dummyResponse);
 
         // when
         MidpointResponseDto result = midpointService.getRecommendedMidpoints(inviteCode,
