@@ -1,5 +1,6 @@
 package com.ODG.ODG_back.strategy;
 
+import com.ODG.ODG_back.domain.Meeting;
 import com.ODG.ODG_back.domain.Midpoint;
 import com.ODG.ODG_back.domain.Participant;
 import com.ODG.ODG_back.dto.midpoint.response.MidpointResponseDto;
@@ -14,7 +15,7 @@ import java.util.function.ToDoubleFunction;
 
 public interface MidpointStrategy {
 
-    MidpointResponseDto calculateMidpoints(String inviteCode);
+    MidpointScoreWithMeta calculateMidpoints(Meeting meeting);
 
     default List<Midpoint> hubNearCenter(List<Participant> ps, List<Midpoint> stations) {
         if (stations.size() <= 25) {
@@ -103,4 +104,6 @@ public interface MidpointStrategy {
     record TimeMatrix(int[][] matrix, List<Participant> rowOrder) {};
     record MidpointScore(Midpoint midpoint, double avg, double totalDeviation,
                          int[] times) {};
+
+    record MidpointScoreWithMeta(MidpointScore midpointScore, Long participantId, int selfTimeSeconds, int participantCount) {}
 }

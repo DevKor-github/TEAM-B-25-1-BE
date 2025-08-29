@@ -34,7 +34,6 @@ import static java.util.stream.Collectors.groupingBy;
 public class TimeMatrixMidpointStrategy implements MidpointStrategy {
 
     private final MeetingRepository meetingRepository;
-    private final RecommendedMidpointRepository recommendedMidpointRepository;
     private final GoogleMatrixApiClient matrixApiClient; // 소요 시간 API 요청
     private final MidpointRepository midpointRepository;
     private final MidpointMapper midpointMapper;
@@ -42,12 +41,9 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
     private final AuthService authService;
 
     @Override
-    public MidpointResponseDto calculateMidpoints(String inviteCode) {
-        log.info("Calculating midpoints for inviteCode: {}", inviteCode);
+    public MidpointScoreWithMeta calculateMidpoints(Meeting meeting) {
+        log.info("Calculating midpoints for inviteCode: {}", meeting.getInviteCode());
 
-        Meeting meeting = meetingRepository.findByInviteCode(inviteCode).orElseThrow(
-                () -> new NotFoundException(ErrorCode.MEETING_NOT_FOUND)
-        );
         // 출발지 = 참가자 위치
         List<Participant> participants = meeting.getParticipants();
         // 목적지 = 모든 지하철역
@@ -70,18 +66,13 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
         int rowIndex = findRowIndex(rowOrder, currentPid);
         int selfTime = best.times()[rowIndex];
 
-        saveRecommendedMidpoint(best, meeting);
-        return midpointMapper.toDtoSelfOnly(
-                best.midpoint(),
-                best.avg(),
-                best.totalDeviation(),
+        return new MidpointScoreWithMeta(
+                best,
                 currentPid,
                 selfTime,
                 participants.size()
         );
     }
-
-
 
     private TimeMatrix buildTimeMatrix(List<Participant> participants, List<Midpoint> candidates) {
 
@@ -119,17 +110,4 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
         return new TimeMatrix(timeMatrix, rowOrder);
     }
 
-    private void saveRecommendedMidpoint(MidpointScore best, Meeting meeting) {
-        log.info("Saving recommended midpoint: {}, average time: {}", best.midpoint().getName(),
-                best.avg());
-        RecommendedMidpoint recommended = new RecommendedMidpoint(
-                null,
-                best.avg(),
-                1,
-                java.time.LocalDateTime.now(),
-                meeting,
-                best.midpoint()
-        );
-        recommendedMidpointRepository.save(recommended);
-    }
 }
