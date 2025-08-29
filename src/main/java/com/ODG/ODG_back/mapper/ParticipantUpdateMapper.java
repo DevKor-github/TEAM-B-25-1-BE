@@ -6,7 +6,8 @@ import org.mapstruct.*;
 
 
 @Mapper(componentModel = "spring")
-public interface ParticipantUpdateMapper{
+public interface ParticipantUpdateMapper {
+
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateFromDto(ParticipantUpdateRequestDto dto, @MappingTarget Participant participant);
 }

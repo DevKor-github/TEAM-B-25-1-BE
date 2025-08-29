@@ -27,6 +27,12 @@ public class Midpoint {
     @Column(precision = 15, scale = 8)
     private BigDecimal longitude;
 
-    @ManyToMany(mappedBy = "midpoints")
-    private List<Place> places;
+    private String line;
+
+    private Double hubScore;
+
+    public Double getHubScore() {
+        return hubScore == null ? 0.0 : hubScore;
+    }
+
 }

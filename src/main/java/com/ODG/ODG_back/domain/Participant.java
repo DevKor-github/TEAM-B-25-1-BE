@@ -28,8 +28,10 @@ public class Participant {
     private TransportType transportType;
 
     private LocalDateTime joinedAt;
+
     @Column(precision = 15, scale = 8)
     private BigDecimal latitude;
+
     @Column(precision = 15, scale = 8)
     private BigDecimal longitude;
 

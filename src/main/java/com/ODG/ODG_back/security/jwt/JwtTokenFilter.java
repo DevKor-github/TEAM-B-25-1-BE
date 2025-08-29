@@ -23,11 +23,11 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain
+            HttpServletResponse response,
+            FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String token = resolveToken(request);
+        String token = jwtTokenProvider.resolveToken(request);
         if (token == null) {
             token = JwtCookieUtil.extractTokenFromCookie(request);
         }
@@ -50,11 +50,4 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private String resolveToken(HttpServletRequest request) {
-        String bearer = request.getHeader("Authorization");
-        if (bearer != null && bearer.startsWith("Bearer")) {
-            return bearer.substring(7);
-        }
-        return null;
-    }
 }

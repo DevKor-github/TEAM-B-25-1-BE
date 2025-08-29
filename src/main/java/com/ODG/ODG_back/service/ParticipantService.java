@@ -26,6 +26,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ParticipantService {
+
     private final ParticipantRepository participantRepository;
     private final ParticipantUpdateMapper participantUpdateMapper;
     private final MeetingRepository meetingRepository;
@@ -34,7 +35,8 @@ public class ParticipantService {
     private final JwtTokenProvider jwtTokenProvider;
 
     // 새 참가자 참여
-    public ParticipantRegisterResponseDto addParticipant(String linkCode, ParticipantRegisterRequestDto dto, String userId) {
+    public ParticipantRegisterResponseDto addParticipant(String linkCode,
+            ParticipantRegisterRequestDto dto, String userId) {
         Participant participant = participantRegisterRequestMapper.toEntity(dto);
         participant.setUserId(userId);
         Meeting meeting = meetingRepository.findByInviteCode(linkCode)
@@ -46,7 +48,8 @@ public class ParticipantService {
             throw new BadRequestException(ErrorCode.DATA_INTEGRITY_VIOLATION);
         }
 
-        ParticipantRegisterResponseDto responseDto = participantRegisterResponseMapper.toDto(participant);
+        ParticipantRegisterResponseDto responseDto = participantRegisterResponseMapper.toDto(
+                participant);
 
         String token = jwtTokenProvider.createToken(userId);
 
@@ -76,7 +79,14 @@ public class ParticipantService {
 
         participantRepository.delete(participant);
     }
+
     public List<ParticipantListResponseDto> getParticipantsWithVoteStatus(String linkCode) {
         return participantRepository.findParticipantsWithVoteStatus(linkCode);
+    }
+
+    public Long getParticipantId(String userId) {
+        Participant participant = participantRepository.findByUserId(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PARTICIPANT_NOT_FOUND));
+        return participant.getId();
     }
 }

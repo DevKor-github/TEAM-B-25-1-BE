@@ -23,7 +23,8 @@ import static java.util.stream.Collectors.groupingBy;
 
 @Component("subwayStrategy")
 @RequiredArgsConstructor
-public class SubwayMidpointStrategy implements MidpointStrategy{
+public class SubwayMidpointStrategy implements MidpointStrategy {
+
     private final int MAX_DISTANCE = 2000; // 최대 검색 거리 (미터 단위)
     private final MeetingRepository meetingRepository;
     private final RecommendedMidpointRepository recommendedMidpointRepository;
@@ -49,13 +50,15 @@ public class SubwayMidpointStrategy implements MidpointStrategy{
             Midpoint nearest = allMidpoints.stream()
                     .min(Comparator.comparing(midpoint ->
                             participant.getLatitude().subtract(midpoint.getLatitude()).abs()
-                                    .add(participant.getLongitude().subtract(midpoint.getLongitude()).abs())
+                                    .add(participant.getLongitude()
+                                            .subtract(midpoint.getLongitude()).abs())
                     ))
                     .orElseThrow(RuntimeException::new);
             nearestMidpoints.add(nearest);
         }
 
-        List<MidpointScore> midpointScores = calculateMidpointScores(nearestMidpoints, allMidpoints, participants.size());
+        List<MidpointScore> midpointScores = calculateMidpointScores(nearestMidpoints, allMidpoints,
+                participants.size());
 
         MidpointScore best = midpointScores.stream()
                 .min(Comparator.comparingDouble(MidpointScore::totalDeviation))
@@ -75,9 +78,10 @@ public class SubwayMidpointStrategy implements MidpointStrategy{
         List<MidpointScore> scores = new ArrayList<>();
 
         for (Midpoint midpoint : allMidpoints) {
-            var score = calculateMidpointScore(nearbyStationsForEachParticipant, numberOfParticipants, midpoint);
+            var score = calculateMidpointScore(nearbyStationsForEachParticipant,
+                    numberOfParticipants, midpoint);
 
-            if(score != null) {
+            if (score != null) {
                 scores.add(score);
             }
         }
@@ -85,10 +89,11 @@ public class SubwayMidpointStrategy implements MidpointStrategy{
         return scores;
     }
 
-    public MidpointScore calculateMidpointScore(List<Midpoint> nearbyStationsForEachParticipant, int numberOfParticipants, Midpoint midpoint) {
+    public MidpointScore calculateMidpointScore(List<Midpoint> nearbyStationsForEachParticipant,
+            int numberOfParticipants, Midpoint midpoint) {
         int totalDuration = 0;
 
-        try{
+        try {
 
             for (Midpoint startStation : nearbyStationsForEachParticipant) {
                 // 시작역과 목적지역 이름이 모두 존재해야 함
@@ -97,10 +102,10 @@ public class SubwayMidpointStrategy implements MidpointStrategy{
                 SubwayDurationTime durationOpt = getDurationInfo(startStation, midpoint);
                 totalDuration += durationOpt.getShortestDurationTime();
 
-                return new MidpointScore(midpoint, (double) totalDuration / numberOfParticipants, totalDuration);
+                return new MidpointScore(midpoint, (double) totalDuration / numberOfParticipants,
+                        totalDuration);
             }
-        }
-        catch (NotFoundException e) {
+        } catch (NotFoundException e) {
             // 해당 midpoint에 대한 정보가 없으면 유효하지 않은 것으로 간주
         }
 
@@ -112,7 +117,7 @@ public class SubwayMidpointStrategy implements MidpointStrategy{
             Midpoint end) {
         // 시작역과 목적지역 이름이 모두 존재해야 함
 
-        if(Objects.equals(start.getId(), end.getId())){
+        if (Objects.equals(start.getId(), end.getId())) {
             new SubwayDurationTime();
             return SubwayDurationTime.builder()
                     .start(start.getId())
@@ -143,5 +148,7 @@ public class SubwayMidpointStrategy implements MidpointStrategy{
         recommendedMidpointRepository.save(recommended);
     }
 
-    public record MidpointScore(Midpoint midpoint, double avg, double totalDeviation) {}
+    public record MidpointScore(Midpoint midpoint, double avg, double totalDeviation) {
+
+    }
 }

@@ -6,5 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class VoteRequestDto {
-    private Long placeId;
+
+    private Integer slotNo;
 }

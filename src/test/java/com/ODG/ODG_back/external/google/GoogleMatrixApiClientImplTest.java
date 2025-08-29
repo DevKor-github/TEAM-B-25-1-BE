@@ -62,7 +62,7 @@ class GoogleMatrixApiClientImplTest {
                 .thenReturn(Mono.just(fakeResponse));
 
         // when
-       int[][] matrix = client.getTimeMatrix(origins, destinations, TransportType.PUBLIC);
+        int[][] matrix = client.getTimeMatrix(origins, destinations, TransportType.PUBLIC);
 
         // then
         assertEquals(2, matrix.length);

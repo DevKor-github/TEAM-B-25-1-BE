@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/meetings")
 @RequiredArgsConstructor
 public class MeetingController {
+
     private final MeetingService meetingService;
 
     @PostMapping("/")
-    public ResponseEntity<MeetingCreateResponseDto> createMeeting(@RequestBody MeetingCreateRequestDto dto) {
+    public ResponseEntity<MeetingCreateResponseDto> createMeeting(
+            @RequestBody MeetingCreateRequestDto dto) {
         return ResponseEntity.ok(meetingService.addMeeting(dto));
     }
 

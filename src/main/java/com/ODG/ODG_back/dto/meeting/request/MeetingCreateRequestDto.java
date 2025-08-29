@@ -7,6 +7,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class MeetingCreateRequestDto {
+
     private String name;
     private MeetingType purpose;
 }

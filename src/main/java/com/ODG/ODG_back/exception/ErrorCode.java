@@ -9,6 +9,7 @@ public enum ErrorCode {
     PARTICIPANT_NOT_FOUND("404", "해당 참가자가 존재하지 않습니다."),
     PLACE_NOT_FOUND("404", "해당 장소가 존재하지 않습니다."),
     RECOMMENDED_MIDPOINT_NOT_FOUND("404", "해당 모임에 대한 중간지점이 존재하지 않습니다."),
+    VOTE_NOT_FOUND("404", "해당 투표가 존재하지 않습니다."),
 
     DATA_INTEGRITY_VIOLATION("400", "중복 혹은 유효하지 않은 데이터입니다."),
     BAD_REQUEST("400", "잘못된 요청입니다."),

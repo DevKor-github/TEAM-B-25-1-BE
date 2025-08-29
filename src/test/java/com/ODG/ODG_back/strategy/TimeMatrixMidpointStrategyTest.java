@@ -89,14 +89,14 @@ class TimeMatrixMidpointStrategyTest {
 
         // 모의 Google API 응답
         when(matrixApiClient.getTimeMatrix(any(), any(), eq(PUBLIC))).thenReturn(
-                new int[][] {
+                new int[][]{
                         {30, 20, 27}, // p1 to m1, m2, m3
                         {35, 22, 23} // p3 to m1, m2, m3
                 }
         );
 
         when(matrixApiClient.getTimeMatrix(any(), any(), eq(CAR))).thenReturn(
-                new int[][] {
+                new int[][]{
                         {15, 18, 10} // p2 to m1, m2, m3
                 }
         );
@@ -104,7 +104,8 @@ class TimeMatrixMidpointStrategyTest {
         when(midpointMapper.toDto(any())).thenAnswer(invocation ->
         {
             Midpoint mp = invocation.getArgument(0);
-            return new MidpointResponseDto(mp.getId(), mp.getName(), mp.getLatitude(), mp.getLongitude());
+            return new MidpointResponseDto(mp.getId(), mp.getName(), mp.getLatitude(),
+                    mp.getLongitude());
         });
 
         // when

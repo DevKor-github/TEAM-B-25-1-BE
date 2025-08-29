@@ -46,10 +46,12 @@ public class GlobalExceptionHandler {
     // 502, 503 External Error
     @ExceptionHandler(ExternalApiException.class)
     public ResponseEntity<ErrorResponse> handlerExternalApiException(ExternalApiException e) {
-        return buildResponse(e.getErrorCode(), HttpStatus.valueOf(Integer.parseInt(e.getErrorCode().getCode())));
+        return buildResponse(e.getErrorCode(),
+                HttpStatus.valueOf(Integer.parseInt(e.getErrorCode().getCode())));
     }
 
     private ResponseEntity<ErrorResponse> buildResponse(ErrorCode errorCode, HttpStatus status) {
-        return new ResponseEntity<>(new ErrorResponse(errorCode.getCode(), errorCode.getMessage()), status);
+        return new ResponseEntity<>(new ErrorResponse(errorCode.getCode(), errorCode.getMessage()),
+                status);
     }
 }

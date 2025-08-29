@@ -7,7 +7,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 
 @Mapper(componentModel = "spring")
-public interface MeetingInfoResponseMapper{
+public interface MeetingInfoResponseMapper {
+
     @Mappings({
             @Mapping(source = "title", target = "name"),
             @Mapping(source = "type", target = "purpose")
