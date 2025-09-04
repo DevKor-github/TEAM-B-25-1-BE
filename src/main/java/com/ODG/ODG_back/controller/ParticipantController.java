@@ -81,4 +81,26 @@ public class ParticipantController {
                 linkCode);
         return ResponseEntity.ok(participants);
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<ParticipantListResponseDto> getMyInfo(
+            @PathVariable String linkCode,
+            Authentication auth
+    ) {
+        if (auth == null || auth.getPrincipal() == null) {
+            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
+        }
+        String userId = (String) auth.getPrincipal();
+        ParticipantListResponseDto participant = participantService.getMyInfo(linkCode, userId);
+        return ResponseEntity.ok(participant);
+    }
+
+    @GetMapping("/{participantId}")
+    public ResponseEntity<ParticipantListResponseDto> getParticipant(
+            @PathVariable String linkCode,
+            @PathVariable Long participantId
+    ) {
+        ParticipantListResponseDto participant = participantService.getParticipant(linkCode, participantId);
+        return ResponseEntity.ok(participant);
+    }
 }
