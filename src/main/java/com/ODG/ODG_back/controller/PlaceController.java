@@ -2,12 +2,15 @@ package com.ODG.ODG_back.controller;
 
 import com.ODG.ODG_back.dto.place.response.GroupedPlacesResponse;
 import com.ODG.ODG_back.dto.place.response.PlaceResponseDto;
+import com.ODG.ODG_back.exception.ErrorCode;
+import com.ODG.ODG_back.exception.custom.UnauthorizedException;
 import com.ODG.ODG_back.security.jwt.JwtTokenProvider;
 import com.ODG.ODG_back.service.ParticipantService;
 import com.ODG.ODG_back.service.PlaceService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,7 +26,6 @@ import java.util.List;
 public class PlaceController {
 
     private final PlaceService placeService;
-    private final JwtTokenProvider jwtTokenProvider;
     private final ParticipantService participantService;
 
     @GetMapping("/places")
@@ -33,10 +35,12 @@ public class PlaceController {
             @RequestParam(defaultValue = "15") int size,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "false") boolean append,
-            HttpServletRequest request
+            Authentication auth
     ) {
-        String token = jwtTokenProvider.resolveToken(request);
-        String userId = jwtTokenProvider.getUserId(token);
+        if (auth == null || auth.getPrincipal() == null) {
+            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
+        }
+        String userId = (String) auth.getPrincipal();
         Long participantId = participantService.getParticipantId(userId);
         return ResponseEntity.ok(
                 placeService.getPlacesByMidpointGrouped(inviteCode, radius, size, page, append, participantId));

@@ -4,13 +4,17 @@ import com.ODG.ODG_back.dto.participant.request.ParticipantRegisterRequestDto;
 import com.ODG.ODG_back.dto.participant.request.ParticipantUpdateRequestDto;
 import com.ODG.ODG_back.dto.participant.response.ParticipantListResponseDto;
 import com.ODG.ODG_back.dto.participant.response.ParticipantRegisterResponseDto;
+import com.ODG.ODG_back.exception.ErrorCode;
+import com.ODG.ODG_back.exception.custom.UnauthorizedException;
 import com.ODG.ODG_back.security.jwt.JwtCookieUtil;
+import com.ODG.ODG_back.security.jwt.JwtTokenFilter;
 import com.ODG.ODG_back.security.jwt.JwtTokenProvider;
 import com.ODG.ODG_back.service.ParticipantService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,18 +27,15 @@ import java.util.UUID;
 public class ParticipantController {
 
     private final ParticipantService participantService;
-    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/register")
     public ResponseEntity<ParticipantRegisterResponseDto> addParticipant(
             @PathVariable String linkCode,
-            @RequestBody ParticipantRegisterRequestDto requestDto,
-            HttpServletResponse response
+            @RequestBody ParticipantRegisterRequestDto requestDto
     ) {
         String userId = UUID.randomUUID().toString();
         ParticipantRegisterResponseDto responseDto = participantService.addParticipant(linkCode,
                 requestDto, userId);
-        JwtCookieUtil.addTokenToCookie(response, responseDto.getAccessToken());
 
         log.info("resp pid={}, nick={}, tokenNull={}, ttl={}",
                 responseDto.getParticipantId(),
@@ -49,9 +50,12 @@ public class ParticipantController {
     @DeleteMapping("/delete")
     public ResponseEntity<Void> deleteParticipant(
             @PathVariable String linkCode,
-            @CookieValue("access_token") String jwtToken
+            Authentication auth
     ) {
-        String userId = jwtTokenProvider.getUserId(jwtToken);
+        if (auth == null || auth.getPrincipal() == null) {
+            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
+        }
+        String userId = (String) auth.getPrincipal();
         participantService.deleteParticipant(linkCode, userId);
         return ResponseEntity.ok().build();
     }
@@ -60,9 +64,12 @@ public class ParticipantController {
     public ResponseEntity<Void> updateParticipant(
             @PathVariable String linkCode,
             @RequestBody ParticipantUpdateRequestDto participantUpdateRequestDto,
-            @CookieValue("access_token") String jwtToken // 쿠키에서 jwt 추출
+            Authentication auth
     ) {
-        String userId = jwtTokenProvider.getUserId(jwtToken);
+        if (auth == null || auth.getPrincipal() == null) {
+            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
+        }
+        String userId = (String) auth.getPrincipal();
         participantService.modifyParticipant(linkCode, userId, participantUpdateRequestDto);
         return ResponseEntity.ok().build();
     }
