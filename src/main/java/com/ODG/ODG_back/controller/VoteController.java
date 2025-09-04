@@ -2,14 +2,14 @@ package com.ODG.ODG_back.controller;
 
 import com.ODG.ODG_back.dto.place.response.PlaceResponseDto;
 import com.ODG.ODG_back.dto.vote.request.VoteRequestDto;
-import com.ODG.ODG_back.dto.vote.response.VoteResultDto;
+import com.ODG.ODG_back.exception.ErrorCode;
+import com.ODG.ODG_back.exception.custom.UnauthorizedException;
 import com.ODG.ODG_back.security.jwt.JwtTokenProvider;
 import com.ODG.ODG_back.service.VoteService;
 import com.ODG.ODG_back.service.VoteService.VoteInstantResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,13 +20,16 @@ import java.util.List;
 public class VoteController {
 
     private final VoteService voteService;
-    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/vote")
-    public ResponseEntity<VoteInstantResponse> vote(@PathVariable String inviteCode,
-            @RequestBody VoteRequestDto voteRequestDto, HttpServletRequest request) {
-        String token = jwtTokenProvider.resolveToken(request);
-        String userId = jwtTokenProvider.getUserId(token);
+    public ResponseEntity<VoteInstantResponse> vote(
+            @PathVariable String inviteCode,
+            @RequestBody VoteRequestDto voteRequestDto,
+            Authentication auth) {
+        if (auth == null || auth.getPrincipal() == null) {
+            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
+        }
+        String userId = (String) auth.getPrincipal();
         return ResponseEntity.ok(voteService.vote(inviteCode, userId, voteRequestDto));
     }
 
