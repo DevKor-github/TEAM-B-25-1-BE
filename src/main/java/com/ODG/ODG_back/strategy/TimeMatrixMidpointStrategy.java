@@ -34,7 +34,6 @@ import static java.util.stream.Collectors.groupingBy;
 public class TimeMatrixMidpointStrategy implements MidpointStrategy {
 
     private final MeetingRepository meetingRepository;
-    private final RecommendedMidpointRepository recommendedMidpointRepository;
     private final GoogleMatrixApiClient matrixApiClient; // 소요 시간 API 요청
     private final MidpointRepository midpointRepository;
     private final MidpointMapper midpointMapper;
@@ -42,12 +41,9 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
     private final AuthService authService;
 
     @Override
-    public MidpointResponseDto calculateMidpoints(String inviteCode) {
-        log.info("Calculating midpoints for inviteCode: {}", inviteCode);
+    public MidpointScoreWithMeta calculateMidpoints(Meeting meeting) {
+        log.info("Calculating midpoints for inviteCode: {}", meeting.getInviteCode());
 
-        Meeting meeting = meetingRepository.findByInviteCode(inviteCode).orElseThrow(
-                () -> new NotFoundException(ErrorCode.MEETING_NOT_FOUND)
-        );
         // 출발지 = 참가자 위치
         List<Participant> participants = meeting.getParticipants();
         // 목적지 = 모든 지하철역
@@ -70,55 +66,12 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
         int rowIndex = findRowIndex(rowOrder, currentPid);
         int selfTime = best.times()[rowIndex];
 
-        saveRecommendedMidpoint(best, meeting);
-        return midpointMapper.toDtoSelfOnly(
-                best.midpoint(),
-                best.avg(),
-                best.totalDeviation(),
+        return new MidpointScoreWithMeta(
+                best,
                 currentPid,
                 selfTime,
                 participants.size()
         );
-    }
-
-    private List<Midpoint> hubNearCenter(List<Participant> ps, List<Midpoint> stations) {
-        if (stations.size() <= 25) {
-            return stations;
-        }
-
-        double centerLat = ps.stream()
-                .map(Participant::getLatitude)
-                .mapToDouble(BigDecimal::doubleValue)
-                .average()
-                .orElse(0.0);
-        double centerLon = ps.stream()
-                .map(Participant::getLongitude)
-                .mapToDouble(BigDecimal::doubleValue)
-                .average()
-                .orElse(0.0);
-
-        ToDoubleFunction<Midpoint> hub = s -> {
-            try {
-                Double v = s.getHubScore();
-                return v == null ? 0.0 : v;
-            } catch (Exception e) {
-                return 0.0;
-            }
-        };
-
-        return stations.stream()
-                .sorted(Comparator.comparingDouble((Midpoint s) ->
-                                -hub.applyAsDouble(s))
-                        .thenComparingDouble(
-                                s -> haversine(centerLat, centerLon, s.getLatitude().doubleValue(),
-                                        s.getLongitude().doubleValue()))
-                )
-                .limit(25)
-                .toList();
-    }
-
-    private record TimeMatrix(int[][] matrix, List<Participant> rowOrder) {
-
     }
 
     private TimeMatrix buildTimeMatrix(List<Participant> participants, List<Midpoint> candidates) {
@@ -157,70 +110,4 @@ public class TimeMatrixMidpointStrategy implements MidpointStrategy {
         return new TimeMatrix(timeMatrix, rowOrder);
     }
 
-    private MidpointScore scoreMidpoints(int[][] timeMatrix, List<Midpoint> midpoints,
-            int numParticipants, List<Participant> rowOrder) {
-        List<MidpointScore> scored = new ArrayList<>();
-
-        for (int j = 0; j < midpoints.size(); j++) {
-            int sum = 0;
-            int[] times = new int[numParticipants];
-            for (int i = 0; i < numParticipants; i++) {
-                times[i] = timeMatrix[i][j];
-                sum += times[i];
-            }
-            double avg = sum / (double) numParticipants;
-
-            double totalDeviation = 0;
-            for (int i = 0; i < numParticipants; i++) {
-                totalDeviation += Math.abs(times[i] - avg);
-            }
-
-            scored.add(new MidpointScore(midpoints.get(j), avg, totalDeviation, times));
-        }
-
-        return scored.stream()
-                .sorted(Comparator.comparingDouble(MidpointScore::avg)
-                        .thenComparingDouble(MidpointScore::totalDeviation))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException());
-    }
-
-    private int findRowIndex(List<Participant> rowOrder, Long pid) {
-        for (int i = 0; i < rowOrder.size(); i++) {
-            if (rowOrder.get(i).getId().equals(pid)) {
-                return i;
-            }
-        }
-        throw new NotFoundException(ErrorCode.PARTICIPANT_NOT_FOUND);
-    }
-
-    private double haversine(double lat1, double lon1, double lat2, double lon2) {
-        final double R = 6371.0088; // 지구 반지름 (km)
-        double dLat = Math.toRadians(lat2 - lat1);
-        double dLon = Math.toRadians(lon2 - lon1);
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c; // 거리 (km)
-    }
-
-    private void saveRecommendedMidpoint(MidpointScore best, Meeting meeting) {
-        log.info("Saving recommended midpoint: {}, average time: {}", best.midpoint().getName(),
-                best.avg());
-        RecommendedMidpoint recommended = new RecommendedMidpoint(
-                null,
-                best.avg(),
-                1,
-                java.time.LocalDateTime.now(),
-                meeting,
-                best.midpoint()
-        );
-        recommendedMidpointRepository.save(recommended);
-    }
-
-    private record MidpointScore(Midpoint midpoint, double avg, double totalDeviation,
-                                 int[] times) {
-
-    }
 }
