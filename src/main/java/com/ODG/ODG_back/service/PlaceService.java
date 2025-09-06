@@ -132,6 +132,20 @@ public class PlaceService {
         }
         var myVoteSlotSet = new java.util.HashSet<>(myVoteSlotNos);
 
+        // 🔢 Prefetch vote counts for this meeting (slotNo -> count)
+        Map<Integer, Integer> voteCountMap = new java.util.HashMap<>();
+        try {
+            var counts = voteRepository.findVoteCountsByMeeting(meeting); // returns DTO/projection with slotNo & voteCount(Long)
+            for (var c : counts) {
+                int slot = c.getSlotNo();
+                int cnt = c.getVoteCount();
+                voteCountMap.put(slot, cnt);
+            }
+        } catch (Exception e) {
+            log.warn("[PlaceService] Failed to prefetch vote counts: {}", e.toString());
+        }
+
+
         List<PlaceSectionDto> sections = new ArrayList<>();
         if (meeting.getType() == MeetingType.SOCIAL) {
             log.info("[PlaceService] Processing SOCIAL meeting - page={}", pageLocal);
@@ -167,6 +181,10 @@ public class PlaceService {
                     for (PlaceResponseDto p : items) {
                         p.setVotedByMe(myVoteSlotNos.contains(p.getSlotNo()));
                     }
+                }
+
+                for (PlaceResponseDto p : items) {
+                    p.setVoteCount(voteCountMap.getOrDefault(p.getSlotNo(), 0));
                 }
 
                 for (PlaceResponseDto p : items) {
@@ -208,6 +226,10 @@ public class PlaceService {
                 for (PlaceResponseDto p : items) {
                     p.setVotedByMe(myVoteSlotNos.contains(p.getSlotNo()));
                 }
+            }
+
+            for (PlaceResponseDto p : items) {
+                p.setVoteCount(voteCountMap.getOrDefault(p.getSlotNo(), 0));
             }
 
             for (PlaceResponseDto p : items) {

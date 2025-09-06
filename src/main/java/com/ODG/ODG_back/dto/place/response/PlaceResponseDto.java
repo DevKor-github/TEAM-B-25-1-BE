@@ -21,10 +21,11 @@ public class PlaceResponseDto {
     private Integer slotNo;
     private String url;
     private boolean votedByMe = false;
+    private Integer voteCount = 0;
 
     public PlaceResponseDto(String id, String name, PlaceCategory category,
             BigDecimal lat, BigDecimal lng, String address,
-            int slotNo, String placeUrl) {
+            int slotNo, String placeUrl, int voteCount) {
         this.placeId = id;
         this.name = name;
         this.category = category;
@@ -33,6 +34,7 @@ public class PlaceResponseDto {
         this.address = address;
         this.slotNo = slotNo;
         this.url = placeUrl;
+        this.voteCount = voteCount;
     }
 
 }
