@@ -122,7 +122,7 @@ public class VoteService {
             if (chosen == null) continue;
 
             // 6) DTO로 추가 (저장 X)
-            PlaceResponseDto dto = toDto(chosen, slotNo);
+            PlaceResponseDto dto = toDto(chosen, slotNo, r.getVoteCount());
             finalPlaces.add(dto);
         }
 
@@ -196,7 +196,7 @@ public class VoteService {
         return chosen;
     }
 
-    private PlaceResponseDto toDto(KakaoPlaceDoc chosen, int slotNo) {
+    private PlaceResponseDto toDto(KakaoPlaceDoc chosen, int slotNo, int voteCount) {
         if (chosen == null) return null;
         return new PlaceResponseDto(
                 chosen.getId(),
@@ -206,7 +206,8 @@ public class VoteService {
                 BigDecimal.valueOf(chosen.getX()),
                 chosen.getAddress_name(),
                 slotNo,
-                chosen.getPlace_url()
+                chosen.getPlace_url(),
+                voteCount
         );
     }
 }

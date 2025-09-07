@@ -89,4 +89,31 @@ public class ParticipantService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PARTICIPANT_NOT_FOUND));
         return participant.getId();
     }
+
+    // 단건 참가자 조회 (공개) - linkCode 범위 내에서 participantId로 조회
+    public ParticipantListResponseDto getParticipant(String linkCode, Long participantId) {
+        // 해당 모임의 참가자 목록(투표 여부 포함)을 가져온 후, id로 필터링
+        List<ParticipantListResponseDto> participants = participantRepository.findParticipantsWithVoteStatus(linkCode);
+        return participants.stream()
+                .filter(p -> p.getParticipantId().equals(participantId))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PARTICIPANT_NOT_FOUND));
+    }
+
+    // 본인 참가자 조회 (인증 필요) - linkCode + userId 기준
+    public ParticipantListResponseDto getMyInfo(String linkCode, String userId) {
+        // 먼저 모임을 확인하고, userId로 참가자 엔티티를 찾아 존재를 보장
+        Meeting meeting = meetingRepository.findByInviteCode(linkCode)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.MEETING_NOT_FOUND));
+
+        Participant participant = participantRepository.findByUserIdAndMeeting(userId, meeting)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PARTICIPANT_NOT_FOUND));
+
+        // 투표 여부 포함 DTO
+        List<ParticipantListResponseDto> participants = participantRepository.findParticipantsWithVoteStatus(linkCode);
+        return participants.stream()
+                .filter(p -> p.getParticipantId().equals(participant.getId()))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PARTICIPANT_NOT_FOUND));
+    }
 }
