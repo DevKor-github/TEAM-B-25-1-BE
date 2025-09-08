@@ -15,5 +15,6 @@ public class ParticipantListResponseDto {
     private TransportType transportType;
     private BigDecimal lat;
     private BigDecimal lng;
+    private String address;
     private boolean hasVoted;
 }
