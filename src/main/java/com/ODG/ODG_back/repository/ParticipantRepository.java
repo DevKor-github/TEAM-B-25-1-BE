@@ -16,11 +16,21 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
 
     Optional<Participant> findByUserId(String userId);
 
-    @Query("SELECT new com.ODG.ODG_back.dto.participant.response.ParticipantListResponseDto(p.id, p.name, p.transportType, p.latitude, p.longitude, "
-            +
-            "CASE WHEN v.participant.id IS NOT NULL THEN true ELSE false END) " +
-            "FROM Participant p LEFT JOIN Vote v ON p.id = v.participant.id " +
-            "WHERE p.meeting.inviteCode = :linkCode")
+    @Query("""
+    SELECT new com.ODG.ODG_back.dto.participant.response.ParticipantListResponseDto(
+        p.id,
+        p.name,
+        p.transportType,
+        p.latitude,
+        p.longitude,
+        p.address,
+        CASE WHEN COUNT(v.id) > 0 THEN true ELSE false END
+    )
+    FROM Participant p
+    LEFT JOIN Vote v ON v.participant.id = p.id
+    WHERE p.meeting.inviteCode = :linkCode
+    GROUP BY p.id, p.name, p.transportType, p.latitude, p.longitude
+    """)
     List<ParticipantListResponseDto> findParticipantsWithVoteStatus(
             @Param("linkCode") String linkCode);
 }
