@@ -9,5 +9,9 @@ import org.mapstruct.*;
 public interface ParticipantUpdateMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mappings({
+            @Mapping(source = "lat", target = "latitude"),
+            @Mapping(source = "lng", target = "longitude")
+    })
     void updateFromDto(ParticipantUpdateRequestDto dto, @MappingTarget Participant participant);
 }
